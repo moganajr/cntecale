@@ -20,11 +20,11 @@ Then open http://localhost:3000 in your browser.
 
 ## Deploy to GitHub Pages
 
-1. Push this folder to a GitHub repository on the `main` or `master` branch.
+1. Source repository: https://github.com/moganajr/cntecale
 2. In the repository, open **Settings → Pages** and set the build and deployment source to **GitHub Actions**.
-3. Push to the selected branch or run **Deploy courses to GitHub Pages** from the Actions tab.
+3. Push to `main` or run **Deploy courses to GitHub Pages** from the Actions tab.
 
-The workflow publishes only the static app files. Student progress remains in each learner's browser and is not uploaded to GitHub.
+After a successful workflow run, the site is available at https://moganajr.github.io/cntecale/ . The workflow publishes only the static app files. Student progress remains in each learner's browser and is not uploaded to GitHub.
 
 ## Offline use
 
