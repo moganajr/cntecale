@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Course | Apps Center for CIU</title>
+    <meta
+      name="description"
+      content="SUAG 309 — Strengthening Local Food Systems interactive course for CIU students."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="course-header">
+        <div class="title-block">
+          <p class="eyebrow">CIU • CNTE-integrated learning</p>
+          <h1 id="courseTitle">SUAG 309 — Strengthening Local Food Systems</h1>
+          <label class="course-switcher" for="courseSelector">Course
+            <select id="courseSelector">
+              <option value="SUAG-309">SUAG 309 · Strengthening Local Food Systems</option>
+              <option value="SUAG-403">SUAG 403 · Analyzing Complex Agricultural Issues</option>
+            </select>
+          </label>
+        </div>
+        <div class="header-stats">
+          <div>
+            <span class="label">Progress</span>
+            <strong id="progressText">0%</strong>
+          </div>
+          <div>
+            <span class="label">Completed</span>
+            <strong id="completedText">0/0</strong>
+          </div>
+        </div>
+      </header>
+
+      <div class="progress-bar" aria-label="Course progress">
+        <span id="progressBar"></span>
+      </div>
+
+      <section class="game-panel" aria-label="Learning points and achievements">
+        <div class="game-score">
+          <span class="label">Learning points</span>
+          <strong id="pointsText">0</strong>
+          <span id="rankText">Course explorer</span>
+        </div>
+        <div id="achievementBadges" class="achievement-badges" aria-live="polite"></div>
+      </section>
+
+      <section id="courseOverview" class="course-overview" hidden>
+        <div class="course-overview-heading">
+          <p class="eyebrow">Course at a glance</p>
+          <p id="courseDescription"></p>
+        </div>
+        <div class="course-overview-details">
+          <div>
+            <h2>Learning outcomes</h2>
+            <ol id="learningOutcomes"></ol>
+          </div>
+          <div>
+            <h2>Assessment · 100 points</h2>
+            <dl id="assessmentBreakdown"></dl>
+          </div>
+        </div>
+        <section id="weeklyCycleSection" class="course-framework" hidden>
+          <h2>Weekly learning cycle</h2>
+          <ol id="weeklyCycle" class="weekly-cycle"></ol>
+        </section>
+        <section id="cnteFrameworkSection" class="course-framework" hidden>
+          <h2>Proposed CNTE learning architecture</h2>
+          <div class="case-table-scroll" tabindex="0">
+            <table class="case-data-table">
+              <thead><tr><th scope="col">Component</th><th scope="col">Proposed course application</th></tr></thead>
+              <tbody id="cnteArchitecture"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="assessmentTracker" class="assessment-tracker" hidden>
+          <div class="assessment-tracker-heading">
+            <div>
+              <h2>Assessment score tracker</h2>
+              <p>Enter scores assigned by your instructor. This personal tracker is not an official CIU grade record.</p>
+            </div>
+            <strong id="assessmentProgress" aria-live="polite">0 of 100 points recorded</strong>
+          </div>
+          <div class="assessment-table-scroll" tabindex="0">
+            <table class="assessment-table">
+              <thead><tr><th scope="col">Assessment</th><th scope="col">Weight</th><th scope="col">Score earned</th></tr></thead>
+              <tbody id="assessmentScoreRows"></tbody>
+            </table>
+          </div>
+          <p id="assessmentScoreSummary" class="assessment-score-summary" aria-live="polite">No instructor-assigned scores recorded.</p>
+        </section>
+        <section id="projectProgress" class="project-progress" hidden>
+          <div class="project-progress-heading">
+            <div>
+              <h2>Continuous applied project</h2>
+              <p>Carry one agricultural issue from diagnosis through investigation, intervention, and defense.</p>
+            </div>
+            <strong id="projectMilestoneStatus" aria-live="polite">0/0 phases</strong>
+          </div>
+          <ol id="projectMilestones" class="project-milestones"></ol>
+        </section>
+        <p class="course-overview-note">CNTE workflows described in this course are proposed instructional uses; availability depends on CIU's CNTE implementation.</p>
+      </section>
+
+      <main class="course-layout">
+        <aside class="sidebar">
+          <div class="sidebar-header">
+            <h2>Course Modules</h2>
+          </div>
+          <div id="moduleList" class="module-list"></div>
+          <div class="lesson-toolbox">
+            <label for="lessonSearch">Find a lesson</label>
+            <input id="lessonSearch" type="search" autocomplete="off">
+            <div id="lessonSearchResults" class="lesson-search-results" aria-live="polite"></div>
+            <h3>Saved lessons <span id="bookmarkCount">(0)</span></h3>
+            <div id="bookmarkList" class="bookmark-list"></div>
+          </div>
+        </aside>
+
+        <section class="content-panel">
+          <div id="lessonPanel" class="lesson-panel"></div>
+        </section>
+      </main>
+
+      <section class="quiz-panel">
+        <div class="section-header">
+          <p class="eyebrow">Knowledge check</p>
+          <h2 id="quizTitle">Week 1 knowledge check</h2>
+        </div>
+        <div id="quizContainer"></div>
+      </section>
+
+      <section class="portfolio-panel" aria-labelledby="portfolioTitle">
+        <div class="section-header">
+          <p class="eyebrow">Student submission</p>
+          <h2 id="portfolioTitle">Learning portfolio</h2>
+        </div>
+        <div class="portfolio-actions">
+          <label for="portfolioLearnerName">Learner name
+            <input id="portfolioLearnerName" maxlength="100" autocomplete="name">
+          </label>
+          <button class="primary-btn" id="downloadPortfolio" type="button">Download portfolio</button>
+          <span id="portfolioStatus" aria-live="polite"></span>
+        </div>
+        <div class="backup-actions">
+          <button class="secondary-btn" id="exportProgressBackup" type="button">Back up progress</button>
+          <button class="secondary-btn" id="chooseProgressBackup" type="button">Restore from backup</button>
+          <input id="progressBackupFile" type="file" accept="application/json,.json" hidden>
+          <span id="backupStatus" aria-live="polite">Backups include saved course work. Keep the file private.</span>
+        </div>
+      </section>
+    </div>
+
+    <script src="suag403-data.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
