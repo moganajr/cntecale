@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import {LABS,titration,ohmsLaw,osmosis,hemoglobinQc,electrical,scoreAttempt} from '../src/science.js';
+import {LABS,titration,ohmsLaw,osmosis,hemoglobinQc,electrical,scoreAttempt,equivalenceVolumeMl,strongAcidBasePH} from '../src/science.js';
 assert.equal(LABS.length,5);
 assert.equal(titration(25,.1,25),.1);
 assert.equal(titration(25,.1,12.5),.05);
@@ -14,4 +14,9 @@ assert.equal(electrical(12,6,'short').safeToEnergize,false);
 assert.equal(electrical(12,6,'none').current,2);
 assert.equal(scoreAttempt({ppe:true,prepared:true,procedure:true,recorded:true,interpretation:true}).score,100);
 assert.equal(scoreAttempt({ppe:true,prepared:true,procedure:true,recorded:true,interpretation:true,safetyFail:true}).score,0);
-console.log('14 scientific and scoring assertions passed.');
+assert.equal(equivalenceVolumeMl(.1,25,.1),25);
+assert.ok(Math.abs(strongAcidBasePH(.1,25,.1,0)-1)<.001);
+assert.ok(Math.abs(strongAcidBasePH(.1,25,.1,25)-7)<.001);
+assert.ok(strongAcidBasePH(.1,25,.1,25.1)>9);
+assert.throws(()=>equivalenceVolumeMl(.1,25,0));
+console.log('19 scientific and scoring assertions passed.');
