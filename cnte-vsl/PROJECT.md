@@ -1,7 +1,7 @@
 # CNTE Virtual Science Laboratories — development status
 
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Latest milestone:** v1.4 — synthetic diagnostic microscopy, live lecture observation and nonclinical slide identification  
+**Latest milestone:** v1.5 — separate student workbenches, centralized classroom authorization, action revisions and reconnect support  
 **Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
 ## Existing single-user laboratories (7)
@@ -76,3 +76,8 @@ The system remains entirely self-built: no third-party virtual science laborator
 The same self-built live classroom now supports a fourth medical practice type, `field-microscope`. The learner actively selects synthetic slide specimens, prepares microscope stage and illumination, selects objective magnification, focuses a computer-rendered synthetic field, identifies structures, saves observations and interprets the comparison between at least two slides. The lecturer can perform the same procedures on a demonstration bench while learner stations remain independent; students see a read-only live lecturer microscope viewport. Optional institutional training videos remain available in the original equipment workshop, without integrating a third-party lab service.
 
 All 1,059 equipment, mechanical, spatial, synthetic-medical and microscopy model assertions passed in the source test harness. Browser rendering, the hosted two-student/lecturer WebSocket integration, clinical expert review and formal competency accreditation remain **unverified**. These are original teaching illustrations, not clinically diagnostic images or patient results. Production CNTE/CALE is unchanged.
+
+
+## Version 1.5 — Live classroom reliability
+
+A new self-built classroom protocol engine centralizes role validation and live student/lecturer state changes, adds monotonic revisions and lecturer-only action history, protects each learner's private snapshot, and preserves student benches across manual reconnects while rooms remain in memory. The corresponding two-student model tests passed 35 assertions. The existing integration test now exercises two students, lecturer demonstration, personal progress privacy, and the chemistry, equipment, and synthetic medical room modes. **Runtime end-to-end execution remains unverified.** See `LIVE_CLASSROOM_QA.md` for required local and hosted acceptance steps. No production branch or external virtual laboratory was changed.
