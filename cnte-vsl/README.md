@@ -70,3 +70,16 @@ Run `npm test` from the `cnte-vsl` folder to execute 19 model/scoring assertions
 ### Preview and release safety
 
 Avoid enabling GitHub Pages at the repository level without first confirming the existing Pages configuration, domain and downstream production deployments. A branch-specific preview can be set up on a dedicated hosting project without altering CNTE's live domain.
+
+
+## Version 0.3 — Measurement, trials, curve and grading
+
+The titration workbench now adds a calibration/eye-level meniscus check, initial and final burette reading fields, repeat trial preparation, an accepted-trial notebook, mean titre and range checks, and a live SVG plot of the idealized strong acid–strong base pH curve. An accepted endpoint requires simulated calibration, PPE, apparatus preparation, indicator and final burette reading within 0.11 mL of the simulated meniscus. Duplicate recording of the same completed trial is blocked.
+
+**Concordance policy:** At least two accepted titres with a maximum difference of 0.20 mL are required for a simulation practice pass. This is an internal teaching configuration, not an official WAEC grading policy.
+
+**Titration scoring (100 points):** PPE 15, preparation 10, calibration 15, indicator 5, procedural technique 15, repeatability 20, trial records 10 and written analysis 10. Failing the concordance condition prevents a practice pass regardless of the numeric score. Other lab tracks retain the original prototype scoring.
+
+**Limitations:** Meniscus entry is verified against an idealized 0.1 mL reading rather than a physical eye-position model. Equipment calibration is a procedural confirmation, not an instrument calibration simulation. The curve is computed from an ideal monoprotic strong acid/base equilibrium at 25 °C, excluding solution activity effects. No exam body or scientific reviewer has approved this simulation for high-stakes assessments.
+
+**Testing:** The enhanced test suite now has 34 assertions covering the first five models and the new titration practical functions. The tests were executed against the retrieved source using an isolated JavaScript assertion harness; a passing remote GitHub Actions workflow has not been confirmed.
