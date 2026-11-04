@@ -44,7 +44,7 @@ wss.on('connection',(ws,req)=>{const query=new URL(req.url,'http://localhost').s
  const client={ws,role,id};room.clients.add(client);tell(ws,{type:'welcome',role,id,room:room.code});announce(room);
  ws.on('message',buffer=>{try{const m=JSON.parse(buffer.toString());if(!m||typeof m!=='object')throw Error('Invalid message');
  if(role==='student'){
-   if(m.type==='medical_action'&&room.mode==='equipment'&&person.medical)person.medical=medicalAction(person.medical,m.action);
+   if(m.type==='medical_action'&&room.mode==='equipment'&&person.medical){if(person.service.locked)throw Error('Lecturer paused this practical');person.medical=medicalAction(person.medical,m.action)}
    else if(m.type==='equipment_action'&&room.mode==='equipment')person.service=serviceAction(person.service,m.action);
    else if(m.type==='action'&&room.mode==='titration')person.bench=applyBenchAction(person.bench,m.action);
    else throw Error('Unsupported action for this laboratory mode');
