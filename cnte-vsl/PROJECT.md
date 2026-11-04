@@ -1,7 +1,7 @@
 # CNTE Virtual Science Laboratories — development status
 
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Latest milestone:** v1.1 — spatial docking, pose feedback and live reassembly pilot  
+**Latest milestone:** v1.2 — collision-aware servicing, tool contact, connector checks and synthetic function responses  
 **Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
 ## Existing single-user laboratories (7)
@@ -55,3 +55,8 @@ See `LIVE_LAB_REQUIREMENTS.md` for **non-negotiable** real practical activity an
 The self-built live repair engine now models per-part attachment locations and an instructional positional/rotational tolerance. Students adjust part X/Y/Z coordinates, see displaced-part and target-mount markers, and must pass the server-validated docking gate before installing. The optional precision snap is an instructional aid. Existing safety isolation, fastener constraints and lecturer supervision remain active; previously passed functional tests expire after subsequent manipulation.
 
 841 equipment, servicing and spatial checks passed in an isolated JS harness. Browser, full WebSocket runtime, scientific realism and device-specific AR/VR validation are still outstanding. This is not manufacturer-certified assembly training.
+
+
+## Version 1.2 additional practical controls
+
+The self-built live workshop now requires tool selection/contact before manual fastener operations or applying digital repairs; collision-aware movements; equipment-specific connector restoration; and synthetic functional response before a practical test can pass. Existing lecturer/student role separation, isolation, 3D positioning and protective-cover sequences remain. Twelve models are supported. Four test groups pass 1,002 assertions; browser and HTTP/WebSocket runtime checks are not yet independently verified. The engine does not claim real CAD, medical instrument calibration, photorealistic 3D, or fully tracked AR/VR.
