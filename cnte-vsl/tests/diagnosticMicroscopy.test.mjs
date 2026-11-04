@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {TEACHING_SLIDES,newMicroscopyStation,evaluateSyntheticView,microscopyAction,microscopyGrade} from '../src/diagnosticMicroscopy.js';
+import {freshMedicalProcedure,medicalAction,medicalPracticalAssessment} from '../src/medicalProcedure.js';
+let checks=0;const eq=(a,b)=>{assert.deepEqual(a,b);checks++},yes=(v)=>{assert.ok(v);checks++},fails=(f)=>{assert.throws(f);checks++};
+eq(Object.keys(TEACHING_SLIDES).length,3);
+let s=freshMedicalProcedure('field-microscope');
+eq(s.microscopy.focus,0);
+fails(()=>medicalAction(s,{kind:'slide-prepare',value:true}));
+s=medicalAction(s,{kind:'ppe',value:true});
+fails(()=>medicalAction(s,{kind:'slide-center',value:true}));
+fails(()=>medicalAction(s,{kind:'slide-observe',structures:['erythrocytes']}));
+const ids=Object.keys(TEACHING_SLIDES);
+for(const slide of ids.slice(0,2)){
+ s=medicalAction(s,{kind:'slide-select',slide});
+ s=medicalAction(s,{kind:'slide-prepare',value:true});
+ s=medicalAction(s,{kind:'slide-light',value:true});
+ s=medicalAction(s,{kind:'slide-center',value:true});
+ s=medicalAction(s,{kind:'slide-objective',value:10});
+ const target=TEACHING_SLIDES[slide].focusTargets[10];
+ s=medicalAction(s,{kind:'slide-focus',value:target});
+ eq(evaluateSyntheticView(s.microscopy).ready,true);
+ s=medicalAction(s,{kind:'slide-observe',structures:TEACHING_SLIDES[slide].structures});
+ yes(s.microscopy.viewed.includes(slide));
+}
+eq(s.microscopy.viewed.length,2);
+s=medicalAction(s,{kind:'interpret',text:'Two synthetic microscopy fields show distinct teaching structures under adjusted focus.'});
+eq(medicalPracticalAssessment(s).passed,true);
+fails(()=>medicalAction(s,{kind:'slide-focus',value:200}));
+fails(()=>medicalAction(s,{kind:'slide-objective',value:100}));
+const p=microscopyAction(newMicroscopyStation(),{kind:'select',slide:'stain'},{ppe:false});
+eq(p.slide,'stain');
+const invalid=medicalAction(s,{kind:'slide-light',value:false});
+eq(medicalPracticalAssessment(invalid).passed,true);
+eq(microscopyGrade(invalid.microscopy,{ppe:true,interpretation:invalid.interpretation}).observations,2);
+console.log(checks+' synthetic microscopy and reporting assertions passed.');
