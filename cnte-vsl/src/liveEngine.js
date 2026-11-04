@@ -8,13 +8,14 @@ export function evaluateTrials(trials){const a=trials.filter(t=>t.accepted).map(
 export function practiceStatus(bench){const repeat=evaluateTrials(bench.trials);const parts={safety:bench.ppe?15:0,setup:bench.burette&&bench.flask?15:0,indicator:bench.indicator?10:0,calibration:bench.calibrated?15:0,recorded:bench.trials.some(t=>t.accepted)?15:0,repeatability:repeat.pass?20:0,explanation:bench.notes.trim().length>=30?10:0};const score=bench.safetyStops?0:Object.values(parts).reduce((x,y)=>x+y,0);return {score,passed:score>=70&&repeat.pass&&!bench.safetyStops,repeat,parts}}
 export function applyBenchAction(bench,action,options={}){if(!action||typeof action!=='object')throw Error('Action required');if(bench.locked)throw Error('Lecturer has paused this workbench');
  const b={...bench,trials:[...bench.trials],events:[...bench.events]};const kind=String(action.kind||'');
+ const unsafe=message=>{const error=new Error(message);error.safetyStop=true;throw error};
  switch(kind){
  case 'ppe':b.ppe=!!action.value;break;
- case 'place':if(!b.ppe)throw Error('Select PPE before handling apparatus');if(!['burette','flask'].includes(action.item))throw Error('Unknown equipment');b[action.item]=true;break;
+ case 'place':if(!b.ppe)unsafe('Safety stop: select PPE before handling apparatus');if(!['burette','flask'].includes(action.item))throw Error('Unknown equipment');b[action.item]=true;break;
  case 'indicator':if(!b.flask)throw Error('Place the flask before indicator');b.indicator=true;break;
  case 'calibrate':if(!b.burette)throw Error('Mount the burette before calibration');b.calibrated=true;break;
  case 'dispense':{
-   if(!b.ppe||!b.burette||!b.flask||!b.indicator||!b.calibrated)throw Error('Complete all instrument, PPE and indicator steps first');
+   if(!b.ppe)unsafe('Safety stop: PPE required before dispensing');if(!b.burette||!b.flask||!b.indicator||!b.calibrated)throw Error('Complete instrument and indicator setup before dispensing');
    if(![.1,.5,1].includes(action.amount))throw Error('Select 0.1, 0.5 or 1 mL dispensing increment');
    if(b.volume+action.amount>50)throw Error('Burette capacity exceeded');
    if(b.trialSealed)throw Error('Start a new trial before dispensing');
