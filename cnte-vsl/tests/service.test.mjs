@@ -12,6 +12,7 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
  fails(()=>serviceAction(b,{kind:'remove',part:target[0]}));
  fails(()=>serviceAction(b,{kind:'tool-turn',part:target[0],tool:'improper',degrees:-90}));
  for(const component of target){
+   b=serviceAction(b,{kind:'contact',part:component,tool:'service-driver'});
    for(let step=0;step<4;step++)b=serviceAction(b,{kind:'tool-turn',tool:'service-driver',part:component,degrees:-90});
    eq(fastenerState(b,component).turns,4);
    b=serviceAction(b,{kind:'remove',part:component});
@@ -20,6 +21,7 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
  fails(()=>serviceAction(b,{kind:'repair',part:fault,tool:REPAIR_TOOL[fault]}));
  b=serviceAction(b,{kind:'inspect',part:fault});
  fails(()=>serviceAction(b,{kind:'repair',part:fault,tool:'wrong'}));
+ b=serviceAction(b,{kind:'contact',part:fault,tool:REPAIR_TOOL[fault]});
  b=serviceAction(b,{kind:'repair',part:fault,tool:REPAIR_TOOL[fault]});
  for(const component of [...target].reverse()){
    fails(()=>serviceAction(b,{kind:'install',part:component}));
@@ -31,9 +33,12 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
    eq(b.alignmentChecks[component].aligned,true);
    b=serviceAction(b,{kind:'install',part:component});
    eq(fastenerState(b,component).secured,false);
+   b=serviceAction(b,{kind:'contact',part:component,tool:'service-driver'});
    for(let step=0;step<4;step++)b=serviceAction(b,{kind:'tool-turn',tool:'service-driver',part:component,degrees:90});
    eq(fastenerState(b,component).secured,true);
  }
+ fails(()=>serviceAction(b,{kind:'test'}));
+ b=serviceAction(b,{kind:'connect',part:fault,connectorKind:({ 'electrical-panel':'electrical','car-starter':'electrical','chemistry-burette':'fluid','microscope':'optical','hematology-analyzer':'sample-fluid','centrifuge':'mechanical','field-microscope':'optical','irrigation-pump':'fluid','computer-workstation':'electrical','sewing-machine':'mechanical','welding-trainer':'electrical','medical-ventilator':'airflow'})[id]});
  b=serviceAction(b,{kind:'test'});eq(serviceAssessment(b).score,100);eq(serviceAssessment(b).passed,true);
  b.locked=true;fails(()=>serviceAction(b,{kind:'inspect',part:fault}));
 }
