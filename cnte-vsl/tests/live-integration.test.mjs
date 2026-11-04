@@ -7,7 +7,7 @@ const PORT=20000+Math.floor(Math.random()*20000);
 const base='http://127.0.0.1:'+PORT,wsBase='ws://127.0.0.1:'+PORT,PREVIEW_KEY='integration-test-access-key-123456';
 const child=spawn(process.execPath,['live-server/server.js'],{cwd:new URL('..',import.meta.url).pathname,env:{...process.env,PORT:String(PORT),HOST:'127.0.0.1',LIVE_PREVIEW_KEY:PREVIEW_KEY},stdio:['ignore','pipe','pipe']});
 let stderr='';child.stderr.on('data',d=>stderr+=d.toString());
-let teacher,student,equipmentTeacher,equipmentStudent,medicalTeacher,medicalStudent,passed=0;
+let teacher,student,secondStudent,equipmentTeacher,equipmentStudent,medicalTeacher,medicalStudent,passed=0;
 const check=(condition,label)=>{assert.ok(condition,label);passed++};
 const api=async(path,body)=>{const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','X-CNTE-Preview-Key':PREVIEW_KEY},body:JSON.stringify(body)});return {status:r.status,data:await r.json()}};
 function onOpen(socket){return new Promise((resolve,reject)=>{socket.once('open',resolve);socket.once('error',reject);setTimeout(()=>reject(Error('WebSocket connection timed out')),5000)})}
@@ -35,6 +35,19 @@ try{
  teacher.send(JSON.stringify({type:'demo_action',action:{kind:'ppe',value:true}}));
  const studentData=await demonstration;
  check(studentData.demo.ppe===true,'student sees instructor demonstration');
+ const secondJoin=await api('/api/rooms/'+created.data.room+'/join',{name:'Laboratory Learner Two'});
+ check(secondJoin.status===201,'second student joins same chemistry room');
+ secondStudent=new WebSocket(wsBase+'/live?room='+created.data.room+'&token='+secondJoin.data.token);
+ await onOpen(secondStudent);
+ const otherInitial=nextMessage(secondStudent,d=>d.type==='snapshot'&&d.participants.length===1&&d.participants[0].id===secondJoin.data.id&&d.participants[0].bench.ppe===false);
+ const otherUpdate=nextMessage(teacher,d=>d.type==='snapshot'&&d.participants.some(p=>p.id===secondJoin.data.id&&p.bench.ppe===true));
+ secondStudent.send(JSON.stringify({type:'action',action:{kind:'ppe',value:true}}));
+ await otherUpdate;check(true,'instructor sees second student action');
+ const secondPrivate=await otherInitial.catch(()=>null);
+ check(secondPrivate!==null,'second student sees only their own bench');
+ const privacyCheck=nextMessage(secondStudent,d=>d.type==='snapshot'&&d.participants.length===1&&d.participants[0].id===secondJoin.data.id);
+ student.send(JSON.stringify({type:'action',action:{kind:'ppe',value:true}}));
+ await privacyCheck;check(true,'other student never receives classmates private bench records');
  const feedback=nextMessage(student,d=>d.type==='feedback'&&d.text==='Check the meniscus');
  teacher.send(JSON.stringify({type:'feedback',studentId:joined.data.id,text:'Check the meniscus'}));
  await feedback;check(true,'private lecturer feedback delivered');
@@ -118,5 +131,5 @@ try{
  microscopeTeacher.close();microscopeStudent.close();
  console.log(passed+' chemistry, equipment, medical and microscopy HTTP/WebSocket integration assertions passed.');
 }finally{
- teacher?.close();student?.close();equipmentTeacher?.close();equipmentStudent?.close();medicalTeacher?.close();medicalStudent?.close();child.kill('SIGTERM');
+ teacher?.close();student?.close();secondStudent?.close();equipmentTeacher?.close();equipmentStudent?.close();medicalTeacher?.close();medicalStudent?.close();child.kill('SIGTERM');
 }
