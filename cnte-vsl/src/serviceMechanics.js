@@ -5,7 +5,7 @@ import {EQUIPMENT,REPAIR_TOOL,newEquipmentState,actEquipment,equipmentStatus} fr
 const finite=(v,name)=>{if(!Number.isFinite(v))throw Error(name+' must be finite');return v};
 export function freshServiceBench(equipmentId='electrical-panel',name='Learner'){
  if(!EQUIPMENT[equipmentId])throw Error('Unknown equipment');
- return {name:String(name).slice(0,60),state:newEquipmentState(equipmentId),fasteners:{},operations:[],locked:false,submitted:false};
+ const state=newEquipmentState(equipmentId);state.safe=false;return {name:String(name).slice(0,60),state,fasteners:{},operations:[],locked:false,submitted:false};
 }
 export function fastenerState(bench,partId){const model=EQUIPMENT[bench.state.equipmentId],part=model.parts.find(p=>p.id===partId);if(!part)throw Error('Unknown part');return bench.fasteners[partId]||{turns:0,secured:true};}
 export function serviceAction(bench,action){
