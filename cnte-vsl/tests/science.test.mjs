@@ -133,4 +133,4 @@ assert.equal(tvetGrade.score,100);
 assert.equal(tvetGrade.passed,true);
 assert.equal(gradeTVET({ppe:true,inspected:true,isolatedInitially:true,records:[evidence,evidence,evidence],diagnoses:diagnoses.slice(0,2),notes:'Only two fault scenarios were documented using the multimeter.'}).passed,false);
 assert.equal(gradeTVET({ppe:true,inspected:true,isolatedInitially:true,records:[evidence,evidence,evidence],diagnoses,notes:'The evidence supports the faults documented for the assessment.',unsafeAttempt:true}).score,0);
-console.log('112 scientific and scoring assertions passed.');
+console.log('111 scientific and scoring assertions passed.');
