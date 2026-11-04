@@ -62,7 +62,8 @@ export function serviceAction(bench,action){
 export function serviceAssessment(bench){
  const st=equipmentStatus(bench.state),parts=EQUIPMENT[bench.state.equipmentId].parts;
  const secured=parts.every(p=>p.fixed||!bench.fasteners[p.id]||bench.fasteners[p.id].turns===0);
- const completedTest=bench.operations.some(o=>o.kind==='test-passed');
+ const lastTest=bench.operations.findLastIndex(o=>o.kind==='test-passed');
+ const completedTest=lastTest>=0&&!bench.operations.slice(lastTest+1).some(o=>['remove','install','repair','tool-turn','isolate','align'].includes(o.kind));
  const unique=new Set(bench.operations.map(o=>o.kind));
  const score=(unique.has('tool-turn')?15:0)+(unique.has('remove')?20:0)+(unique.has('inspect')?10:0)+(unique.has('repair')?25:0)+(unique.has('install')?15:0)+(st.operational&&secured&&completedTest?15:0);
  return {score,passed:score>=80&&st.operational&&secured&&completedTest,secured,completedTest,operational:st.operational,simulationOnly:true};
