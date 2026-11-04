@@ -44,6 +44,9 @@ jobs:
           node --check src/tvetWorkbench.js
           node --check src/liveEngine.js
           node --check src/live.js
+          node --check src/equipmentEngine.js
+          node --check src/equipmentWorkshop.js
+          node --check tests/equipment.test.mjs
           node --check live-server/server.js
           node --check tests/live.test.mjs
           node --check tests/live-integration.test.mjs
