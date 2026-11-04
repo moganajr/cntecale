@@ -53,7 +53,7 @@ export function wireBiology(s,{refresh,back,submit,download}){
  for(const key of ['prepared','lightOn'])document.getElementById('bio-'+key).onchange=e=>{p[key]=e.target.checked;refresh()};
  document.getElementById('bio-slide').onchange=e=>{p.slide=e.target.value;p.features=[];refresh()};
  document.getElementById('bio-objective').onchange=e=>{p.objective=Number(e.target.value);refresh()};
- for(const key of ['focus','stageX','stageY'])document.getElementById('bio-'+key).oninput=e=>{p[key]=Number(e.target.value);p.stageCentered=Math.abs(p.stageX-50)<=12&&Math.abs(p.stageY-50)<=12;refresh()};
+ for(const key of ['focus','stageX','stageY'])document.getElementById('bio-'+key).onchange=e=>{p[key]=Number(e.target.value);p.stageCentered=Math.abs(p.stageX-50)<=12&&Math.abs(p.stageY-50)<=12;refresh()};
  document.getElementById('bio-center').onclick=()=>{p.stageX=50;p.stageY=50;p.stageCentered=true;refresh()};
  document.querySelectorAll('[data-bio-feature]').forEach(el=>el.onchange=e=>{const v=el.dataset.bioFeature;p.features=e.target.checked?[...new Set([...p.features,v])]:p.features.filter(x=>x!==v);});
  document.getElementById('bio-observe').onclick=()=>{
