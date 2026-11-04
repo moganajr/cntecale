@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import {EQUIPMENT,REPAIR_TOOL} from '../src/equipmentEngine.js';
 import {freshServiceBench,fastenerState,serviceAction,serviceAssessment} from '../src/serviceMechanics.js';
+import {dockingTarget,displacedPose,evaluateDock} from '../src/spatialAssembly.js';
 let count=0;const yes=(v,l)=>{assert.ok(v,l);count++},eq=(a,b)=>{assert.deepEqual(a,b);count++},fails=fn=>{assert.throws(fn);count++};
 for(const [id,model] of Object.entries(EQUIPMENT)){
  let b=freshServiceBench(id,'Test student');eq(b.state.equipmentId,id);eq(serviceAssessment(b).passed,false);
@@ -21,6 +22,13 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
  fails(()=>serviceAction(b,{kind:'repair',part:fault,tool:'wrong'}));
  b=serviceAction(b,{kind:'repair',part:fault,tool:REPAIR_TOOL[fault]});
  for(const component of [...target].reverse()){
+   fails(()=>serviceAction(b,{kind:'install',part:component}));
+   const off=displacedPose(id,component);
+   b=serviceAction(b,{kind:'align',part:component,pose:off});
+   eq(evaluateDock(id,component,off).aligned,false);
+   fails(()=>serviceAction(b,{kind:'install',part:component}));
+   b=serviceAction(b,{kind:'align',part:component,pose:dockingTarget(id,component)});
+   eq(b.alignmentChecks[component].aligned,true);
    b=serviceAction(b,{kind:'install',part:component});
    eq(fastenerState(b,component).secured,false);
    for(let step=0;step<4;step++)b=serviceAction(b,{kind:'tool-turn',tool:'service-driver',part:component,degrees:90});
