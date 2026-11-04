@@ -13,3 +13,16 @@ export function osmosis(concentration,initialMass=5){const changePercent=12-1.2*
 export function hemoglobinQc(observed=13.5,assigned=13.5,tolerance=0.5){return {deviation:observed-assigned,pass:Math.abs(observed-assigned)<=tolerance}}
 export function electrical(volts,resistance,fault){if(fault==='short')return {safeToEnergize:false,current:null,voltageAcrossLoad:0};if(fault==='open')return {safeToEnergize:true,current:0,voltageAcrossLoad:0};return {safeToEnergize:true,current:ohmsLaw(volts,resistance),voltageAcrossLoad:volts}}
 export function scoreAttempt({ppe=false,prepared=false,procedure=false,recorded=false,interpretation=false,safetyFail=false}){if(safetyFail)return {score:0,passed:false,safetyFail:true};const score=(ppe?15:0)+(prepared?10:0)+(procedure?25:0)+(recorded?30:0)+(interpretation?20:0);return {score,passed:score>=70,safetyFail:false}}
+/** Strong monoprotic acid/base teaching model (25 C, ideal activities). */
+export function equivalenceVolumeMl(acidMolarity,acidVolumeMl,baseMolarity){
+ if (![acidMolarity,acidVolumeMl,baseMolarity].every(x=>Number.isFinite(x)&&x>0))throw Error('Concentrations and volumes must be positive finite numbers');
+ return acidMolarity*acidVolumeMl/baseMolarity;
+}
+export function strongAcidBasePH(acidMolarity,acidVolumeMl,baseMolarity,baseVolumeMl){
+ if(!Number.isFinite(baseVolumeMl)||baseVolumeMl<0)throw Error('Titrant volume must be nonnegative');
+ const eq=equivalenceVolumeMl(acidMolarity,acidVolumeMl,baseMolarity);
+ const residual=(acidMolarity*acidVolumeMl-baseMolarity*baseVolumeMl)/(acidVolumeMl+baseVolumeMl);
+ // Charge balance with water autoionization: [H+] - [OH-] = residual.
+ const h=(residual+Math.sqrt(residual*residual+4e-14))/2;
+ return Math.max(0,Math.min(14,-Math.log10(h)));
+}
