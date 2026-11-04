@@ -3,11 +3,14 @@ import http from 'node:http';
 import {createReadStream,statSync,existsSync} from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {randomBytes} from 'node:crypto';
+import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import {freshBench,applyBenchAction,practiceStatus} from '../src/liveEngine.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const port=Number(process.env.PORT||8080),host=process.env.HOST||'127.0.0.1';
+const previewKey=process.env.LIVE_PREVIEW_KEY||'';
+if(!['127.0.0.1','localhost'].includes(host)&&previewKey.length<16)throw Error('Network hosting requires LIVE_PREVIEW_KEY of at least 16 characters (pilot safeguard).');
+function previewAllowed(req){if(!previewKey)return true;const candidate=String(req.headers['x-cnte-preview-key']||'');const a=Buffer.from(candidate),b=Buffer.from(previewKey);return a.length===b.length&&timingSafeEqual(a,b)}
 const rooms=new Map(),roomTtl=4*60*60*1000,MAX_ROOMS=50,MAX_LEARNERS=40;
 const secret=()=>randomBytes(24).toString('base64url');
 const code=()=>randomBytes(4).toString('hex').toUpperCase();
@@ -20,6 +23,7 @@ function tell(ws,data){if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(
 function announce(room){const data=snapshot(room);for(const c of room.clients)tell(c.ws,c.role==='lecturer'?data:{type:'snapshot',room:room.code,assignment:room.assignment,demo:room.demo,participants:data.participants.filter(p=>p.id===c.id),onlineCount:room.clients.size,updated:data.updated})}
 const server=http.createServer(async(req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;
  if(req.method==='GET'&&pathname==='/api/health')return reply(res,200,{status:'ok',prototype:true,rooms:rooms.size});
+ if(req.method==='POST'&&pathname.startsWith('/api/rooms')&&!previewAllowed(req))return reply(res,403,{error:'Invalid classroom preview access key'});
  if(req.method==='POST'&&pathname==='/api/rooms'){try{if(rooms.size>=MAX_ROOMS)return reply(res,429,{error:'Server room limit reached'});const b=await decodeBody(req),name=safeName(b.name);if(name.length<2)return reply(res,400,{error:'Lecturer display name is required'});let id;do{id=code()}while(rooms.has(id));const token=secret();rooms.set(id,{code:id,teacherToken:token,teacherName:name,assignment:'Acid-base titration: perform two concordant trials, record evidence and explain observations.',demo:freshBench('Lecturer demonstration'),learners:new Map(),clients:new Set(),created:Date.now()});return reply(res,201,{room:id,token,role:'lecturer',name})}catch(e){return reply(res,400,{error:e.message})}}
  const join=pathname.match(/^\/api\/rooms\/([A-F0-9]{8})\/join$/);
  if(req.method==='POST'&&join){try{const room=rooms.get(join[1]);if(!room)return reply(res,404,{error:'Classroom not found or expired'});const b=await decodeBody(req),name=safeName(b.name);if(name.length<2)return reply(res,400,{error:'Student display name is required'});if(room.learners.size>=MAX_LEARNERS)return reply(res,429,{error:'Class is full'});const id=secret().slice(0,12),token=secret();room.learners.set(id,{name,token,bench:freshBench(name),sockets:new Set()});return reply(res,201,{room:room.code,token,role:'student',id,name})}catch(e){return reply(res,400,{error:e.message})}}
