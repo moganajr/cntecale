@@ -159,3 +159,51 @@ Visit `http://127.0.0.1:8080/live.html` in separate lecturer and student browser
 - Full multi-browser end-to-end verification, specialist review, deployment, and production integration remain pending. The updated automated CI workflow now includes a real HTTP/WebSocket integration test, but CI success has not been verified in this conversation.
 
 **No production CNTE/CALE source files on `main` were changed by this development milestone.**
+
+
+## Version 0.9 — Advanced repairable equipment workshop and self-running lessons
+
+The self-built `equipment.html` module (linked from the main laboratory dashboard and program cards) adds a **reusable equipment engineering workspace** intended for chemistry, biology, public health, university science, medical laboratory science, agriculture, computer/electronics, and vocational technical training. This is a step toward the hands-on capability requirements in `LIVE_LAB_REQUIREMENTS.md`; it does not yet meet high-end immersive simulation standards.
+
+### Interactive mechanics now implemented
+
+- 12 representative illustrated equipment assemblies, with uniquely identified and labeled components.
+- 360-degree rotation by slider; selectable components; transparent / see-through cutaway view; exploded assembly view; parts list.
+- Safety-isolation gates, dependency-constrained disassembly/reassembly, inspection of one training fault per model, correct digital tool selection, repair state and maintenance evidence.
+- Practice rubric (inspection 15, disassembly 20, correct repair 30, reassembly 20, restored state 15) and JSON export.
+- Low-cost stereoscopic *preview* (side-by-side projections). This is not tracked VR/headset support.
+- Optional camera overlay that shows the equipment projection over a local camera feed; this is **not** spatially registered AR, object tracking, real-world equipment recognition or a certified WebXR experience.
+- Built-in institutional instructional video player. Lecturers can choose a locally owned MP4/WebM/OGG file, play/pause, enable muted autoplay with looping, and use a separate self-running step-by-step instruction demonstration with timed on-screen captions. No videos are copied from PraxiLabs or other providers, bundled, uploaded to a server, or fetched from a third-party API.
+- Browser autoplay with sound may be blocked. Students can manually start playback. The step-by-step procedure animation is locally generated, independent of the video player.
+- The lesson is fully self-built and does not require an external laboratory or video integration.
+
+### Equipment prototypes
+
+1. TVET electrical control panel (fuse).
+2. Automotive starter motor (brush).
+3. Chemistry burette (stopcock).
+4. Compound microscope (lamp).
+5. Synthetic hematology analyzer (sample probe).
+6. Synthetic bench centrifuge (rotor).
+7. Public-health field microscope (illumination).
+8. Agricultural irrigation pump (impeller).
+9. Desktop computer system unit (RAM).
+10. Fashion/design sewing machine (needle).
+11. Welding torch assembly (contact tip).
+12. Respiratory-training ventilator circuit unit (illustrative filter).
+
+The parts are deliberately **simplified box-mesh drawings**, not original equipment manufacturer CAD models, physically calibrated assemblies, physics-based deformation, or medical device service instructions. User interaction and part dependencies are active, but neither the video nor the stereoscopic visualization proves realistic advanced VR. The camera overlay remains optional and local-only. Operational medical training still requires specialist sign-off.
+
+### Validation and future work
+
+The additional equipment module has **246 passing model and mechanical-action assertions** covering 12 models, rotation, transparency, exploded modes, protective-cover sequencing, component repair, tool selection and restoration. These passed in the isolated JavaScript assertion harness; full browser, WebXR, physics accuracy and faculty acceptance tests remain to be completed. The default Node test script and GitHub Actions syntax/test workflow are updated. Earlier laboratory model checks (111) and live classroom checks (30) remain included in the suite.
+
+Next milestones:
+- Replace indicative box geometry with validated, anatomically/mechanically accurate 3D assets and true interactive tool manipulation with snap-to-fit, torque/clearance/connector constraints.
+- Add WebXR headset sessions, tracked controllers and spatial AR anchors with fallback accessibility and device compatibility checks. Do not claim these capabilities exist yet.
+- Integrate the self-built live classroom teaching engine with equipment event streams, lecturer demonstration, supervised repairs, instructor approval and durable audit trails.
+- Add authored institutional video and caption libraries, guided demonstrations, accessible transcripts, variable playback and instructor-controlled assignments.
+- Build equipment validation program with TVET assessors, practicing medical lab scientists, engineers and safety reviewers; map to approved competency standards, then conduct learner trials.
+- Preserve CNTE/CALE production features and keep the `main` branch untouched until review.
+
+**Status:** v0.9 development source committed; no hosted deployment, verified browser integration, or institutional accreditation is claimed.
