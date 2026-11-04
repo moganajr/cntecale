@@ -34,3 +34,5 @@ jobs:
           node --check src/biologyMicroscopy.js
           node --check src/biologyWorkbench.js
           node --check src/biology3d.js
+          node --check src/medicalLab.js
+          node --check src/medicalWorkbench.js
