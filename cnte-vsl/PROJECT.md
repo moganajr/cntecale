@@ -1,42 +1,39 @@
-# CNTE Virtual Science Laboratories — Development Status
+# CNTE Virtual Science Laboratories — development status
 
-**Repository:** `moganajr/cntecale`  
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Status:** Prototype source committed, scientific tests pass locally, GitHub workflow added, hosted preview not yet enabled.
+**Latest milestone:** v0.8 — collaborative practical classroom pilot  
+**Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
-## Implemented in version 0.1
+## Existing single-user laboratories (7)
+1. Chemistry — acid–base titration, repeated trials, pH curve, 3D apparatus illustration.
+2. Physics — Ohm's law with series/parallel ideal networks and 3D equipment illustration.
+3. Biology — potato osmosis model.
+4. Medical laboratory — introductory hemoglobin/QC simulation.
+5. TVET — low-voltage electrical fault diagnosis and 3D equipment illustration.
+6. Biology — virtual microscopy and synthetic slides.
+7. Medical laboratory — advanced synthetic hematology and three-level QC.
 
-- Five interactive **2D** laboratories: acid-base titration, Ohm's law, potato osmosis, synthetic hematology quality control, and low-voltage fault diagnosis
-- Browser-based learner dashboard, procedure and safety checks, simplified scientific computation, local notebook, practice scores, and JSON/CSV exports
-- Responsive interface and offline app-shell caching
-- A Node.js test suite with 14 model and scoring assertions
-- An isolated GitHub Actions workflow for scientific tests and JavaScript syntax validation
+## New v0.8 collaboration pilot
 
-## Run locally
+- Same-origin Node.js HTTP + WebSocket classroom server (isolated from production).
+- Lecturer creates a room, assigns a task, performs live shared titration, monitors independent learner benches, coaches and resets/restricts work.
+- Student joins via room code and temporary token; equipment placement, indicator, calibration, incremental titrant dispensing, meniscus reading, repeated titres and lab notes are server-validated actions.
+- Live 3D apparatus illustration plus interactive 2D apparatus actions; instructor and student dashboards update over WebSocket.
+- Preliminary preview access key, role separation and four-hour in-memory room expiry.
+- Software integration test defined for actual lecturer/student exchange, feedback, demonstration, safety-stop, reset and room access.
+- All 111 previous scientific/scoring assertions plus 30 live-state assertions passed in the isolated JavaScript test harness. A real Node/WebSocket server run, browser interaction test and GitHub Actions result are not yet verified.
 
-```bash
-cd cnte-vsl
-npm test
-python3 -m http.server 8080
-```
+## First practical classroom launch
 
-Then open `http://localhost:8080`.
+Read `deploy/README.md`. The service must run as a Node web application (`npm install && npm start`), **not** solely under GitHub Pages. No public development URL exists yet. An isolated Render configuration example is available, but deployment requires a connected hosting account and approval of the preview configuration.
 
-## Important limitations
+## Required next phases
 
-This prototype is not a full 3D/AR/VR lab. Results use simplified educational models not independently validated for regulated or high-stakes assessment. Its portfolio and scores are local to the browser and **not** connected to CNTE/CALE. GitHub Pages or any other hosting preview has not yet been enabled.
+1. Deploy restricted live preview to an isolated Node host and verify HTTP/WebSocket integration.
+2. Validate with two browsers and a lecturer/student pilot class.
+3. Upgrade live interactions to manipulated, not only rotatable, 3D apparatus with realistic science.
+4. Adapt the live classroom architecture to physics, biology, medical laboratory and TVET.
+5. Integrate audited CNTE/CALE authentication, course roster, LMS, gradebook and durable portfolios.
+6. Obtain curriculum, scientific and safety review before high-stakes assessment.
 
-## Safeguards
-
-- Keep `main` unchanged until reviewed
-- Audit the real CNTE/CALE authentication, course, grade and portfolio interfaces prior to integration
-- Require scientific, curriculum, and safety approvals before formal usage
-- Never use synthetic medical scenarios for real diagnosis or credential physical competence based on simulation alone
-
-## Next milestones
-
-1. Enable an isolated preview without disrupting an existing Pages configuration.
-2. Run GitHub Actions and investigate any workflow errors.
-3. Validate scientific behavior and WASSCE/academic curriculum mappings.
-4. Introduce genuine interactive 3D equipment and a versioned laboratory authoring framework.
-5. Implement authenticated, audited CALE integration after inspection.
+See `LIVE_LAB_REQUIREMENTS.md` for **non-negotiable** real practical activity and lecturer supervision expectations.
