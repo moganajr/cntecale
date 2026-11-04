@@ -1,0 +1,91 @@
+name: CNTE-VSL Cloudflare Container (manual, nonproduction)
+on:
+  workflow_dispatch:
+    inputs:
+      deploy_container:
+        description: 'Deploy isolated Container backend after approval, otherwise validate only'
+        type: boolean
+        required: true
+        default: false
+permissions:
+  contents: read
+concurrency:
+  group: cnte-vsl-container-development
+  cancel-in-progress: false
+jobs:
+  verify:
+    name: Test source and Docker build
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: cnte-vsl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/cnte-virtual-science-labs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install application dependencies
+        run: npm install --no-package-lock --ignore-scripts
+      - name: Run scientific and authorization tests
+        run: npm test
+      - name: Run real HTTP and WebSocket integration
+        run: npm run test:integration
+      - name: Validate backend Worker and Node server syntax
+        run: |
+          node --check cloudflare/container-worker.js
+          node --check live-server/server.js
+      - name: Build isolated Docker image
+        run: docker build -t cnte-vsl-dev:qa -f Dockerfile .
+      - name: Start container and verify health
+        run: |
+          docker run -d --name cnte-vsl-qa -p 127.0.0.1:18080:8080 \
+            -e HOST=0.0.0.0 -e PORT=8080 \
+            -e LIVE_PREVIEW_KEY=development-test-key-only-1234567890 \
+            cnte-vsl-dev:qa
+          for attempt in $(seq 1 40); do
+            if curl --fail --silent http://127.0.0.1:18080/api/health >/dev/null; then exit 0; fi
+            sleep 1
+          done
+          docker logs cnte-vsl-qa
+          exit 1
+      - name: Show container log on failure
+        if: failure()
+        run: docker logs cnte-vsl-qa || true
+  deploy:
+    name: Deploy isolated backend only
+    needs: verify
+    if: ${{ inputs.deploy_container && vars.CNTE_VSL_PAID_DEPLOY_APPROVED == 'true' }}
+    runs-on: ubuntu-latest
+    environment: cnte-vsl-development
+    defaults:
+      run:
+        working-directory: cnte-vsl
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/cnte-virtual-science-labs
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm branch and Cloudflare credentials
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          test "$GITHUB_REF_NAME" = "feature/cnte-virtual-science-labs" || exit 1
+          test -n "$CLOUDFLARE_API_TOKEN" || exit 1
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || exit 1
+      - name: Deploy the PRIVATE Cloudflare Container Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: npx --yes wrangler@4.141.0 deploy --config cloudflare/wrangler.jsonc
+      - name: Manual secret and service-binding reminder
+        run: |
+          echo "Next step: Agent Lee must set the identical CNTE_VSL_BRIDGE_KEY secret"
+          echo "on both the existing authentication Worker and this private Container Worker."
+          echo "Agent Lee must add an internal Worker service binding, verify access controls,"
+          echo "and separately authorize the labs-dev custom domain."
+          echo "No CNTE production route or DNS record is changed by this workflow."
