@@ -28,3 +28,6 @@ jobs:
           node --check src/science.js
           node --check src/scene3d.js
           node --check src/titrationPractical.js
+          node --check src/physicsCircuit.js
+          node --check src/physicsWorkbench.js
+          node --check src/physics3d.js
