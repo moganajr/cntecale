@@ -3,6 +3,17 @@ import {QC_LEVELS,TRAINING_SAMPLES,qualityGate} from './medicalLab.js';
 import {MEDICAL_SCENARIOS,medicalPracticalAssessment} from './medicalProcedure.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const item=(id,label,checked)=>`<label class="check"><input type="checkbox" data-med-action="${id}" ${checked?'checked':''}> ${label}</label>`;
+function medicalStation(s){
+ const type=MEDICAL_SCENARIOS[s.equipmentId].kind;
+ const label=type==='hematology'?'Synthetic specimen tube':type==='centrifuge'?'Paired training tubes':'Synthetic airflow connector';
+ const target=type==='hematology'?'Virtual analyzer sample port':type==='centrifuge'?'Simulated balanced rotor':'Respiratory training circuit inlet';
+ const done=type==='hematology'?s.loaded:type==='centrifuge'?s.balanced:s.circuitConnected;
+ return `<div class="clinical-station" role="group" aria-label="Interactive medical apparatus"><div class="clinical-apparatus">
+ <button type="button" class="clinical-part" id="clinical-part" draggable="true" aria-label="Select or drag ${esc(label)}"><span aria-hidden="true">${type==='hematology'?'🧪':type==='centrifuge'?'⚗️':'🔧'}</span><b>${esc(label)}</b></button>
+ <div class="clinical-arrow" aria-hidden="true">→</div>
+ <div class="clinical-target" id="clinical-drop" tabindex="0" role="group" aria-label="Drop specimen or component into ${esc(target)}"><span aria-hidden="true">${type==='hematology'?'🔬':type==='centrifuge'?'⚙️':'🫁'}</span><b>${esc(target)}</b><small>${done?'Placed in training apparatus':'Awaiting component placement'}</small></div>
+ </div><p class="muted">Drag the component to its station or select it and press the place button. The same server-side safety and sequence rules apply.</p><button type="button" class="secondary" id="clinical-place">Place training component</button></div>`;
+}
 export function medicalPracticalPanel(s){
  if(!s)return '';
  const scenario=MEDICAL_SCENARIOS[s.equipmentId],grade=medicalPracticalAssessment(s);
@@ -22,6 +33,7 @@ export function medicalPracticalPanel(s){
  return `<section class="panel" id="medical-practical-panel"><h3>Clinical equipment practical — ${esc(scenario.title)}</h3>
  <div class="note safety">Synthetic training data only. Do not enter patient information or use this software for clinical interpretation, physical servicing or therapeutic decisions.</div>
  <div class="controls">${item('ppe','PPE and biosafety orientation completed',s.ppe)}</div>
+ ${medicalStation(s)}
  ${task}
  <div class="field" style="margin-top:14px"><label for="clinical-notes">Scientific interpretation and reflection</label><textarea id="clinical-notes" rows="3" maxlength="2000" placeholder="Explain procedural checks, results, remaining limitations...">${esc(s.interpretation)}</textarea></div>
  <div class="toolbar"><button id="clinical-save-notes" class="secondary">Record interpretation</button></div>
@@ -30,6 +42,11 @@ export function medicalPracticalPanel(s){
 export function bindMedicalPanel(send){
  const panel=document.getElementById('medical-practical-panel');if(!panel)return;
  panel.querySelectorAll('[data-med-action]').forEach(x=>x.onchange=e=>send({kind:x.dataset.medAction,value:e.target.checked}));
+ const place=()=>{const kind=panel.querySelector('#clinical-case')?'load':panel.querySelector('#clinical-rpm')?'balance':'circuit';send(kind==='load'?{kind,sampleId:document.getElementById('clinical-case').value}:{kind,value:true})};
+ const part=panel.querySelector('#clinical-part'),drop=panel.querySelector('#clinical-drop'),placeButton=panel.querySelector('#clinical-place');
+ if(part){part.ondragstart=e=>e.dataTransfer.setData('text/plain','cnte-medical-component');part.onclick=()=>part.classList.toggle('chosen')}
+ if(drop){drop.ondragover=e=>e.preventDefault();drop.ondrop=e=>{e.preventDefault();if(e.dataTransfer.getData('text/plain')==='cnte-medical-component')place()}}
+ if(placeButton)placeButton.onclick=place;
  const load=document.getElementById('clinical-load');if(load)load.onclick=()=>send({kind:'load',sampleId:document.getElementById('clinical-case').value});
  const control=document.getElementById('clinical-qc-record');if(control)control.onclick=()=>send({kind:'qc',level:document.getElementById('clinical-qc-level').value,value:Number(document.getElementById('clinical-qc-value').value)});
  const level=document.getElementById('clinical-qc-level');if(level)level.onchange=e=>{document.getElementById('clinical-qc-value').value=QC_LEVELS[e.target.value].target};
