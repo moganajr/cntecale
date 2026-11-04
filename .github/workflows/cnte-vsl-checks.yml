@@ -36,3 +36,5 @@ jobs:
           node --check src/biology3d.js
           node --check src/medicalLab.js
           node --check src/medicalWorkbench.js
+          node --check src/tvetFaults.js
+          node --check src/tvetWorkbench.js
