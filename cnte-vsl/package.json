@@ -1,0 +1,1 @@
+{"name":"cnte-vsl","version":"0.1.0","type":"module","private":true,"scripts":{"test":"node tests/science.test.mjs","serve":"python3 -m http.server 8080"}}
