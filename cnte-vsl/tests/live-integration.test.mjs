@@ -7,7 +7,7 @@ const PORT=20000+Math.floor(Math.random()*20000);
 const base='http://127.0.0.1:'+PORT,wsBase='ws://127.0.0.1:'+PORT,PREVIEW_KEY='integration-test-access-key-123456';
 const child=spawn(process.execPath,['live-server/server.js'],{cwd:new URL('..',import.meta.url).pathname,env:{...process.env,PORT:String(PORT),HOST:'127.0.0.1',LIVE_PREVIEW_KEY:PREVIEW_KEY},stdio:['ignore','pipe','pipe']});
 let stderr='';child.stderr.on('data',d=>stderr+=d.toString());
-let teacher,student,equipmentTeacher,equipmentStudent,passed=0;
+let teacher,student,equipmentTeacher,equipmentStudent,medicalTeacher,medicalStudent,passed=0;
 const check=(condition,label)=>{assert.ok(condition,label);passed++};
 const api=async(path,body)=>{const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','X-CNTE-Preview-Key':PREVIEW_KEY},body:JSON.stringify(body)});return {status:r.status,data:await r.json()}};
 function onOpen(socket){return new Promise((resolve,reject)=>{socket.once('open',resolve);socket.once('error',reject);setTimeout(()=>reject(Error('WebSocket connection timed out')),5000)})}
@@ -80,7 +80,28 @@ try{
  equipmentTeacher.send(JSON.stringify({type:'reset_learner',studentId:equipmentJoin.data.id}));
  await resetEquip;
  check(true,'lecturer can reset equipment for repeated training');
- console.log(passed+' chemistry and equipment HTTP/WebSocket integration assertions passed.');
+ const medicalRoom=await api('/api/rooms',{name:'Clinical Simulation Instructor',mode:'equipment',equipmentId:'hematology-analyzer'});
+ check(medicalRoom.status===201,'lecturer opens synthetic medical workshop');
+ const medicalJoin=await api('/api/rooms/'+medicalRoom.data.room+'/join',{name:'Medical Learner'});
+ check(medicalJoin.status===201,'student joins synthetic medical workshop');
+ medicalTeacher=new WebSocket(wsBase+'/live?room='+medicalRoom.data.room+'&token='+medicalRoom.data.token);
+ await onOpen(medicalTeacher);
+ medicalStudent=new WebSocket(wsBase+'/live?room='+medicalRoom.data.room+'&token='+medicalJoin.data.token);
+ await onOpen(medicalStudent);
+ const medicalUpdate=nextMessage(medicalTeacher,d=>d.type==='snapshot'&&d.medicalParticipants?.some(p=>p.id===medicalJoin.data.id&&p.procedure?.ppe===true));
+ medicalStudent.send(JSON.stringify({type:'medical_action',action:{kind:'ppe',value:true}}));
+ const updatedMedical=await medicalUpdate;
+ check(updatedMedical.medicalParticipants.some(p=>p.procedure.ppe),'lecturer sees learner medical biosafety check');
+ const medicalDemo=nextMessage(medicalStudent,d=>d.type==='snapshot'&&d.medicalDemo?.ppe===true);
+ medicalTeacher.send(JSON.stringify({type:'medical_demo_action',action:{kind:'ppe',value:true}}));
+ await medicalDemo;check(true,'student sees lecturer medical practical demonstration');
+ const medicalPause=nextMessage(medicalStudent,d=>d.type==='snapshot'&&d.serviceParticipants?.[0]?.service.locked===true);
+ medicalTeacher.send(JSON.stringify({type:'pause',studentId:medicalJoin.data.id,value:true}));
+ await medicalPause;
+ const medicalBlocked=nextMessage(medicalStudent,d=>d.type==='error'&&/paused/.test(d.message));
+ medicalStudent.send(JSON.stringify({type:'medical_action',action:{kind:'identity',value:true}}));
+ await medicalBlocked;check(true,'lecturer pause blocks learner medical procedure');
+ console.log(passed+' chemistry, equipment and medical HTTP/WebSocket integration assertions passed.');
 }finally{
- teacher?.close();student?.close();equipmentTeacher?.close();equipmentStudent?.close();child.kill('SIGTERM');
+ teacher?.close();student?.close();equipmentTeacher?.close();equipmentStudent?.close();medicalTeacher?.close();medicalStudent?.close();child.kill('SIGTERM');
 }
