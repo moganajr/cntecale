@@ -44,7 +44,7 @@ function wireBench(){
  document.getElementById('ppe')?.addEventListener('change',e=>benchAction('ppe',{value:e.target.checked}));
  document.querySelectorAll('[data-step]').forEach(b=>b.onclick=()=>benchAction(b.dataset.step));
  document.querySelectorAll('[data-tool]').forEach(b=>{b.ondragstart=e=>{e.dataTransfer.setData('text/plain',b.dataset.tool)};b.onclick=()=>{const item=b.dataset.tool;if(confirm('Place '+item+' on the laboratory bench?'))benchAction('place',{item})}});
- const bench=document.getElementById('dropbench');if(bench){bench.ondragover=e=>e.preventDefault();bench.ondrop=e=>{e.preventDefault();const item=e.dataTransfer.getData('text/plain');action('place',{item})}};
+ const bench=document.getElementById('dropbench');if(bench){bench.ondragover=e=>e.preventDefault();bench.ondrop=e=>{e.preventDefault();const item=e.dataTransfer.getData('text/plain');benchAction('place',{item})}};
  document.querySelectorAll('[data-action^="add-"]').forEach(b=>b.onclick=()=>benchAction('dispense',{amount:Number(b.dataset.action.slice(4))}));
  document.querySelector('[data-action="record"]')?.addEventListener('click',()=>benchAction('record',{reading:Number(document.getElementById('reading').value)}));
  document.querySelector('[data-action="next"]')?.addEventListener('click',()=>benchAction('next'));
