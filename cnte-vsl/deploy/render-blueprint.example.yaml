@@ -1,0 +1,18 @@
+# EXAMPLE ONLY. Review before copying to a Render Blueprint.
+# Deploy ONLY as an isolated development service, not over existing CNTE.
+services:
+  - type: web
+    name: cnte-vsl-live-preview
+    runtime: node
+    rootDir: cnte-vsl
+    buildCommand: npm install --ignore-scripts --no-package-lock
+    startCommand: npm start
+    autoDeploy: false
+    healthCheckPath: /api/health
+    envVars:
+      - key: HOST
+        value: 0.0.0.0
+      - key: NODE_ENV
+        value: production
+      - key: LIVE_PREVIEW_KEY
+        sync: false
