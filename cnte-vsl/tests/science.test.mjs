@@ -39,4 +39,4 @@ assert.equal(titrationPracticalGrade({ppe:true,prepared:true,calibrated:true,ind
 const curve=titrationCurve(strongAcidBasePH,{maxMl:30,stepMl:5});
 assert.equal(curve.length,7);
 assert.ok(Math.abs(curve[5].pH-7)<.001);
-console.log('33 scientific and scoring assertions passed.');
+console.log('34 scientific and scoring assertions passed.');
