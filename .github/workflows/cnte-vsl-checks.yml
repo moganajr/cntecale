@@ -43,6 +43,8 @@ jobs:
           node --check src/tvetFaults.js
           node --check src/tvetWorkbench.js
           node --check src/liveEngine.js
+          node --check src/classroomCore.js
+          node --check tests/classroomCore.test.mjs
           node --check src/live.js
           node --check src/equipmentEngine.js
           node --check src/equipmentWorkshop.js
