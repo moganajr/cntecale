@@ -56,3 +56,17 @@ Use a qualified secondary science teacher, chemistry/physics/biology laboratory 
 - `src/styles.css`: responsive UI design
 - `sw.js`, `manifest.webmanifest`, `assets/icon.svg`: installable offline app shell
 - `tests/science.test.mjs`: numerical validation assertions
+
+## Version 0.2 development milestone — 3D titration
+
+The chemistry titration workbench now includes a dependency-free 3D geometry renderer with drag-to-rotate and wheel-to-zoom, a visible burette and conical flask, titrant volume changes, and a selectable accessible 2D diagram. Volume is dispensed through explicit keyboard-accessible buttons (0.1, 0.5, 1.0 mL); the 3D scene is a visualization rather than a fully physics-simulated fluid engine.
+
+The titration model now exposes an ideal 25 °C strong monoprotic acid/base pH calculation based on molar amounts and water autoionization, with input validation and a computed equivalence volume. It is an educational model and **must not** be interpreted as a calibrated laboratory instrument or validated examination score.
+
+### Verification
+
+Run `npm test` from the `cnte-vsl` folder to execute 19 model/scoring assertions. A GitHub Actions workflow is committed, but its remote execution result must be checked before claiming CI success. The code is on an isolated development branch; no production deployment or authenticated CALE integration has occurred.
+
+### Preview and release safety
+
+Avoid enabling GitHub Pages at the repository level without first confirming the existing Pages configuration, domain and downstream production deployments. A branch-specific preview can be set up on a dedicated hosting project without altering CNTE's live domain.
