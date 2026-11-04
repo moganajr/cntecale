@@ -1,7 +1,7 @@
 # CNTE Virtual Science Laboratories — development status
 
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Latest milestone:** v1.3 — live synthetic hematology, centrifuge and respiratory instrument practicals  
+**Latest milestone:** v1.4 — synthetic diagnostic microscopy, live lecture observation and nonclinical slide identification  
 **Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
 ## Existing single-user laboratories (7)
@@ -69,3 +69,10 @@ Three interactive procedure engines (synthetic hematology/QC, centrifuge safety,
 The equipment/servicing/spatial/physical/medical model suite passed 1,037 assertions in an isolated JavaScript harness. The medical UI, live server and expanded HTTP/WebSocket test sources passed syntax checks. Actual multi-browser WebSocket test execution, hosting, clinical expert review, headset AR/VR functionality and clinical device calibration are still unverified. This is an instructional prototype with synthetic data and cannot be used for real diagnosis, treatment or physical medical device maintenance.
 
 The system remains entirely self-built: no third-party virtual science laboratory integration; production CNTE/CALE main branch unchanged.
+
+
+## Version 1.4 — Live medical microscopy
+
+The same self-built live classroom now supports a fourth medical practice type, `field-microscope`. The learner actively selects synthetic slide specimens, prepares microscope stage and illumination, selects objective magnification, focuses a computer-rendered synthetic field, identifies structures, saves observations and interprets the comparison between at least two slides. The lecturer can perform the same procedures on a demonstration bench while learner stations remain independent; students see a read-only live lecturer microscope viewport. Optional institutional training videos remain available in the original equipment workshop, without integrating a third-party lab service.
+
+All 1,059 equipment, mechanical, spatial, synthetic-medical and microscopy model assertions passed in the source test harness. Browser rendering, the hosted two-student/lecturer WebSocket integration, clinical expert review and formal competency accreditation remain **unverified**. These are original teaching illustrations, not clinically diagnostic images or patient results. Production CNTE/CALE is unchanged.
