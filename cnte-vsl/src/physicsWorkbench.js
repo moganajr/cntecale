@@ -10,7 +10,7 @@ export function physicsView(s){
  return `<div class="labbar"><button id="physics-back">← All laboratories</button><span class="pill">Physics practical · v0.4</span></div>
  <div class="pagehead"><span class="eyebrow">Physics / WASSCE · University · TVET</span><h1>DC Circuit Builder & Ohm's Law</h1><p class="muted">Assemble simulated series and parallel resistor circuits, place meters, check safety, run measurements and compare theoretical values. Ideal DC education model.</p></div>
  <div class="split"><div>
- <section class="panel"><h3>Interactive circuit schematic</h3>
+ <section class="panel"><h3>Rotatable 3D circuit workbench</h3><div class="apparatus" id="physics-3d"></div><p class="muted">Drag to rotate and scroll to zoom. The schematic and controls below define the actual simulated circuit.</p></section><section class="panel"><h3>Interactive circuit schematic</h3>
  <div class="apparatus"><svg viewBox="0 0 580 300" role="img" aria-label="Circuit with DC supply, two resistors, current meter and voltmeter; wire connections depend on topology" style="max-height:330px">
  <rect x="5" y="5" width="570" height="290" rx="12" fill="#eaf5f7"/>
  <g stroke="${res.status==='measured'?'#189786':'#648594'}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">${wires}</g>
