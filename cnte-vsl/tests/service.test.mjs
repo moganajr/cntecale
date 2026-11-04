@@ -6,6 +6,7 @@ let count=0;const yes=(v,l)=>{assert.ok(v,l);count++},eq=(a,b)=>{assert.deepEqua
 for(const [id,model] of Object.entries(EQUIPMENT)){
  let b=freshServiceBench(id,'Test student');eq(b.state.equipmentId,id);eq(serviceAssessment(b).passed,false);
  eq(b.state.safe,false);fails(()=>serviceAction(b,{kind:'tool-turn',part:model.fault,tool:'service-driver',degrees:-90}));b=serviceAction(b,{kind:'isolate',value:true});eq(b.state.safe,true);
+ fails(()=>serviceAction(b,{kind:'tool-turn',part:model.fault,tool:'service-driver',degrees:-90}));
  const fault=model.fault,part=model.parts.find(p=>p.id===fault),target=[];
  function walk(partId){const p=model.parts.find(q=>q.id===partId);for(const dep of p.prerequisites||[])if(!target.includes(dep))walk(dep);if(!target.includes(partId))target.push(partId)}
  walk(fault);
@@ -40,6 +41,11 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
  fails(()=>serviceAction(b,{kind:'test'}));
  b=serviceAction(b,{kind:'connect',part:fault,connectorKind:({ 'electrical-panel':'electrical','car-starter':'electrical','chemistry-burette':'fluid','microscope':'optical','hematology-analyzer':'sample-fluid','centrifuge':'mechanical','field-microscope':'optical','irrigation-pump':'fluid','computer-workstation':'electrical','sewing-machine':'mechanical','welding-trainer':'electrical','medical-ventilator':'airflow'})[id]});
  b=serviceAction(b,{kind:'test'});eq(serviceAssessment(b).score,100);eq(serviceAssessment(b).passed,true);
+ b=serviceAction(b,{kind:'contact',part:model.fault,tool:'service-driver'});
+ b=serviceAction(b,{kind:'tool-turn',part:model.fault,tool:'service-driver',degrees:-90});
+ eq(serviceAssessment(b).passed,false);
+ b=serviceAction(b,{kind:'tool-turn',part:model.fault,tool:'service-driver',degrees:90});
+ b=serviceAction(b,{kind:'test'});eq(serviceAssessment(b).passed,true);
  b.locked=true;fails(()=>serviceAction(b,{kind:'inspect',part:fault}));
 }
 fails(()=>freshServiceBench('not-exists'));
