@@ -246,3 +246,12 @@ The software validation now includes 246 existing equipment mechanics checks and
 6. Validate with instructors, medical laboratory scientists, engineers, and TVET assessors before classroom or high-stakes use.
 
 Use `npm install`, `npm test`, `npm run test:integration` and `npm start` from `cnte-vsl` to run the current development classroom. Open `http://127.0.0.1:8080/equipment-live.html` and create separate lecturer/student sessions. A Node.js server is required; static GitHub Pages hosting cannot provide live sessions.
+
+
+### Version 1.0 safety and validation update
+
+The live equipment practical starts with **source isolation not yet confirmed**. The student or lecturer must explicitly select the isolation/lockout control before tool turns, component removal, replacement or digital repair. This remains a software teaching control; it does not verify physical lockout/tagout of any real device.
+
+Direct drag-and-drop of component chips between **installed parts** and **removed parts** trays now triggers the same server-validated remove/install actions as accessible buttons, including fastener and dependency gates. Snapping remains logical/sequence-based, not yet true 6-DOF physical alignment.
+
+The expanded equipment and service model tests now pass **492 assertions** (246 equipment and 246 service tests), executed in an isolated JavaScript test harness. An updated WebSocket integration test has been committed for the chemistry and equipment live sessions, but a successful run against a hosted/installed live server has not been confirmed.
