@@ -1,7 +1,7 @@
 /** CNTE-VSL native instructor/student medical practical UI. */
 import {QC_LEVELS,TRAINING_SAMPLES,qualityGate} from './medicalLab.js';
 import {MEDICAL_SCENARIOS,medicalPracticalAssessment} from './medicalProcedure.js';
-import {microscopyPanel,bindMicroscopyPanel} from './microscopyLivePanel.js';
+import {microscopyPanel,bindMicroscopyPanel,microscopyReadonlyPreview} from './microscopyLivePanel.js';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const item=(id,label,checked)=>`<label class="check"><input type="checkbox" data-med-action="${id}" ${checked?'checked':''}> ${label}</label>`;
 function medicalStation(s){
@@ -63,6 +63,6 @@ export function medicalDemoSummary(s){
  const latest=s.readings.length?s.readings[s.readings.length-1]:null;
  return `<section class="panel"><h3>Lecturer's live medical demonstration</h3><p class="muted">${esc(scenario.title)} — the instructor's actions update this view automatically.</p>
  <div class="note"><b>Simulation status:</b> PPE ${s.ppe?'complete':'pending'} · ${s.actions.length} procedural actions · Practice score ${score.score}/100</div>
- <div class="note">Latest result: ${latest?esc(JSON.stringify(latest)):'No synthetic measurement yet'}</div>
+ <div class="note">Latest result: ${latest?esc(JSON.stringify(latest)):'No synthetic measurement yet'}</div>${scenario.kind==='microscopy'?microscopyReadonlyPreview(s.microscopy):''}
  <p class="muted">Observe the instructor's procedure while completing your own independent medical exercise.</p></section>`;
 }
