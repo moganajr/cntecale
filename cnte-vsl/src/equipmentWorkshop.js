@@ -49,7 +49,7 @@ function updateVisualOnly(kind,value){try{state=actEquipment(state,{kind,value,d
 function wireShapes(){document.querySelectorAll('[data-part]').forEach(x=>{x.addEventListener('click',()=>selectPart(x.dataset.part));x.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();selectPart(x.dataset.part)}})})}
 function stopCamera(){if(arStream){arStream.getTracks().forEach(t=>t.stop());arStream=null}const v=document.getElementById('ar-camera');if(v)v.srcObject=null}
 function stopDemo(){if(demoTimer){clearInterval(demoTimer);demoTimer=null}}
-function render(){root.innerHTML=viewHtml();wireShapes();document.getElementById('equipment-select').onchange=e=>{stopDemo();stopCamera();equipmentId=e.target.value;state=newEquipmentState(equipmentId);selected=EQUIPMENT[equipmentId].fault;tool=REPAIR_TOOL[selected];render()};
+function render(){const previousVideo=document.getElementById('training-video');const resumeAt=previousVideo&&Number.isFinite(previousVideo.currentTime)?previousVideo.currentTime:0;const resumePlaying=previousVideo&&!previousVideo.paused&&!previousVideo.ended;root.innerHTML=viewHtml();wireShapes();document.getElementById('equipment-select').onchange=e=>{stopDemo();stopCamera();equipmentId=e.target.value;state=newEquipmentState(equipmentId);selected=EQUIPMENT[equipmentId].fault;tool=REPAIR_TOOL[selected];render()};
  document.getElementById('part-select').onchange=e=>selectPart(e.target.value);document.getElementById('tool-select').onchange=e=>{tool=e.target.value};
  document.querySelectorAll('[data-equip-action]').forEach(b=>b.onclick=()=>perform(b.dataset.equipAction));
  document.getElementById('safe-isolation').onchange=e=>{try{state=actEquipment(state,{kind:'isolate',value:e.target.checked});render()}catch(err){alert(err.message)}};
@@ -58,13 +58,14 @@ function render(){root.innerHTML=viewHtml();wireShapes();document.getElementById
  for(const [id,kind] of [['view-transparent','transparent'],['view-exploded','exploded'],['view-labels','labels']])document.getElementById(id).onchange=e=>updateVisualOnly(kind,e.target.checked);
  document.getElementById('reset-equip').onclick=()=>{if(confirm('Reset virtual repair progress?')){state=newEquipmentState(equipmentId);render()}};
  document.getElementById('export-equip').onclick=()=>{const blob=new Blob([JSON.stringify({equipment:equipmentId,state,assessment:equipmentAssessment(state),simulationOnly:true},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cnte-vsl-equipment-practice.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)};
- const video=document.getElementById('training-video');if(mediaUrl){video.src=mediaUrl;video.muted=true;video.loop=autoplay;video.load();if(autoplay)video.play().catch(()=>{})}
+ const video=document.getElementById('training-video');if(mediaUrl){video.src=mediaUrl;video.muted=true;video.loop=autoplay;video.addEventListener('loadedmetadata',()=>{if(resumeAt>0&&Number.isFinite(video.duration))video.currentTime=Math.min(resumeAt,Math.max(0,video.duration-.05));if(autoplay||resumePlaying)video.play().catch(()=>{})},{once:true});video.load()}
  document.getElementById('load-video').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('video/')){alert('Choose a video file.');return}if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(file);mediaName=file.name;render()};
  document.getElementById('video-autoplay').onchange=e=>{autoplay=e.target.checked;video.muted=true;video.loop=autoplay;if(autoplay)video.play().catch(()=>{})};
  document.getElementById('remove-video').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=null;mediaName='';render()};
  const nextStep=()=>{demoStep=(demoStep+1)%steps.length;document.getElementById('demo-caption').innerHTML='<b>Step '+(demoStep+1)+' of '+steps.length+':</b> '+h(steps[demoStep])};
  document.getElementById('demo-next').onclick=nextStep;
  document.getElementById('demo-toggle').onclick=()=>{if(demoTimer){stopDemo()}else{demoTimer=setInterval(nextStep,3800)}document.getElementById('demo-toggle').textContent=demoTimer?'Stop automated procedure':'Play automated procedure'};
+ if(arStream){const camera=document.getElementById('ar-camera');if(camera){camera.srcObject=arStream;camera.play().catch(()=>{})}}
  document.getElementById('ar-start').onclick=async()=>{try{stopCamera();arStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'},audio:false});document.getElementById('ar-camera').srcObject=arStream}catch(e){alert('Camera access unavailable or declined: '+e.message)}};
  document.getElementById('ar-stop').onclick=stopCamera;
 }
