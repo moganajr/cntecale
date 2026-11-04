@@ -21,10 +21,10 @@ function access(){return `<div class="service-page"><div class="pagehead"><span 
 function current(){if(!credentials||!snapshot)return null;return credentials.role==='lecturer'?snapshot.serviceDemo:snapshot.serviceParticipants?.[0]?.service}
 function stage(bench,lecturer=false){if(!bench)return '<div class="loading">Connecting live workbench…</div>';
  const model=EQUIPMENT[bench.state.equipmentId],assessment=serviceAssessment(bench),selection=model.parts.find(p=>p.id===part)||model.parts.find(p=>p.id===model.fault);
- if(!part)part=selection.id;
+ if(!part||!model.parts.some(p=>p.id===part))part=selection.id;
  const fastener=bench.fasteners[selection.id]||{turns:0,secured:true};
  return `<section class="panel"><div class="roomhead"><h3>${lecturer?'Lecturer demonstration':'Student equipment'} — ${esc(model.name)}</h3><span class="pill">${assessment.score}/100 practice points</span></div><div class="note">Part condition: ${assessment.operational?'Operational':'Requires repair'} · Fasteners: ${assessment.secured?'Secured':'Require tightening'} · Final test: ${assessment.completedTest?'Passed':'Pending'}</div>
- <div class="service-preview" id="service-preview">${scene(model,bench)}</div>
+ <div class="service-preview" id="service-preview">${scene(model,bench)}</div><div class="service-drag-area"><div id="service-installed" class="service-dropzone" aria-label="Installed equipment components; drop a removed part here to reassemble"><b>Installed parts — drag into parts tray to remove</b>${model.parts.filter(p=>!bench.state.removed.includes(p.id)).map(p=>`<button class="service-part-chip" draggable="true" data-drag-part="${esc(p.id)}">${esc(p.label)}</button>`).join('')}</div><div id="service-removed" class="service-dropzone" aria-label="Removed parts tray; drop a component to remove it"><b>Removed parts tray — drag back to reassemble</b>${model.parts.filter(p=>bench.state.removed.includes(p.id)).map(p=>`<button class="service-part-chip" draggable="true" data-drag-part="${esc(p.id)}">${esc(p.label)}</button>`).join('')}</div></div>
  <div class="controls"><div class="field"><label for="service-angle">Rotate 360° — ${Math.round(angle)}°</label><input id="service-angle" type="range" min="0" max="360" value="${angle}"></div><label class="check"><input id="service-transparent" type="checkbox" ${transparent?'checked':''}> Transparent / cutaway</label><label class="check"><input id="service-labels" type="checkbox" ${labels?'checked':''}> Part labeling</label>
  <div class="field"><label for="service-part">Selected component</label><select id="service-part">${model.parts.map(p=>`<option value="${esc(p.id)}" ${p.id===part?'selected':''}>${esc(p.label)}</option>`).join('')}</select></div></div>
  <div class="note">Selected: <b>${esc(selection.label)}</b>. Fastener released by ${fastener.turns}/4 quarter turns. ${bench.state.removed.includes(selection.id)?'Component detached':'Component installed'}.</div>
@@ -46,7 +46,9 @@ function bind(){
  $('service-labels').onchange=e=>{labels=e.target.checked;$('service-preview').innerHTML=scene(EQUIPMENT[b.state.equipmentId],b);wireParts()};
  $('service-part').onchange=e=>{part=e.target.value;render()};
  document.querySelectorAll('[data-service]').forEach(btn=>btn.onclick=()=>{const kind=btn.dataset.service;const action={kind,part,tool:kind==='tool-turn'?'service-driver':REPAIR_TOOL[part],degrees:Number(btn.dataset.degrees)};service(action)});
- wireParts()
+ wireParts();
+ document.querySelectorAll('[data-drag-part]').forEach(chip=>{chip.ondragstart=e=>e.dataTransfer.setData('text/plain',chip.dataset.dragPart);chip.onclick=()=>{part=chip.dataset.dragPart;render()}});
+ for(const [id,kind] of [['service-removed','remove'],['service-installed','install']]){const area=$(id);area.ondragover=e=>e.preventDefault();area.ondrop=e=>{e.preventDefault();const moved=e.dataTransfer.getData('text/plain');if(!EQUIPMENT[b.state.equipmentId].parts.some(p=>p.id===moved))return;part=moved;service({kind,part:moved})}}
  }
  document.querySelectorAll('[data-pause]').forEach(btn=>btn.onclick=()=>send({type:'pause',studentId:btn.dataset.pause,value:btn.dataset.locked!=='1'}));
  document.querySelectorAll('[data-reset]').forEach(btn=>btn.onclick=()=>{if(confirm('Reset learner equipment and practice evidence?'))send({type:'reset_learner',studentId:btn.dataset.reset})});
