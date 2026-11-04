@@ -207,3 +207,42 @@ Next milestones:
 - Preserve CNTE/CALE production features and keep the `main` branch untouched until review.
 
 **Status:** v0.9 development source committed; no hosted deployment, verified browser integration, or institutional accreditation is claimed.
+
+
+## Version 1.0 — Live equipment maintenance and manipulation
+
+A new `equipment-live.html` interface introduces a second kind of lecturer-led practical in the existing **self-built** WebSocket classroom server. A lecturer can create an equipment room for any of the twelve equipment models, perform a live servicing demonstration, monitor the progress of separate learner service benches, provide direct feedback, pause attempts, and authorize resets. The original chemistry live classroom and individual science laboratory catalog are retained.
+
+### Learner interactions
+
+- Select equipment parts in a rotatable, see-through, labeled 3D projection, or use accessible controls.
+- Dismantle components using dedicated **installed-parts** and **removed-parts** drag-and-drop trays, or equivalent remove/install buttons.
+- Apply a virtual fastener driver by 90° increments. Four loosening turns are needed before removing a component; after reassembly, all disturbed fasteners must be tightened.
+- Respect protective-cover removal order and internal component reassembly dependencies.
+- Inspect a simulated damaged part, select its matching repair tool, carry out a digital repair, and reinstall it.
+- Run a functional test only after all parts are installed and fasteners secured, with the simulated fault repaired.
+- Inspect evidence, performed operations, and the simulated practice score.
+
+### Live controls
+
+- Students cannot alter another student's assembly or the lecturer demonstration.
+- The instructor and each student receive independently validated equipment states through the Node.js WebSocket service.
+- The lecturer has live workbench monitoring, individual text feedback, pause/resume and reset-for-retry permissions.
+- These dedicated equipment sessions are separate from titration sessions and **do not require any third-party virtual laboratory integration**.
+
+### Current standards and restrictions
+
+The apparatus remains *illustrative low-poly box geometry*. This is **not yet high-fidelity physics**, haptic tool handling, tracked spatial AR/VR, certified medical device maintenance, manufacturer CAD, instrument calibration, graded torque feedback, or approved qualification evidence. The fastening and sequence constraints are educational approximations. Live-room data remain in memory, use demonstration identities and expire after four hours. Persistent academic portfolios and secure CNTE identity integration are not included in this milestone.
+
+The software validation now includes 246 existing equipment mechanics checks and **210 new servicing-mechanics checks**. These passed in the isolated JavaScript test harness. The existing chemistry/live state regression checks also remain configured. A WebSocket integration test was expanded to cover equipment rooms, lecturer demonstrations, live monitoring, pause and reset; however the expanded test has not been observed completing against a running server. Full browser QA and hosted deployment are still pending.
+
+### Next realistic-equipment roadmap
+
+1. Replace box-mesh geometry with specialist-reviewed, dimensioned, textured parts and full 3D meshes.
+2. Add tool collisions, spatial snapping, joint constraints, actual fastener selection, reassembly tolerances, and torque/range checking.
+3. Add scientifically validated electrical, mechanical, biological, and medical instrument responses to component failures.
+4. Progress from side-by-side stereo previews to a tested WebXR VR controller workflow and optional spatially tracked AR with fallback support.
+5. Build original CNTE instructor-led procedure videos, synchronized annotations, transcripts and automated playback into each live workshop.
+6. Validate with instructors, medical laboratory scientists, engineers, and TVET assessors before classroom or high-stakes use.
+
+Use `npm install`, `npm test`, `npm run test:integration` and `npm start` from `cnte-vsl` to run the current development classroom. Open `http://127.0.0.1:8080/equipment-live.html` and create separate lecturer/student sessions. A Node.js server is required; static GitHub Pages hosting cannot provide live sessions.
