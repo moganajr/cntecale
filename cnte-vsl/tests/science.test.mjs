@@ -66,4 +66,4 @@ assert.equal(physicsGrade.score,100);
 assert.equal(physicsGrade.passed,true);
 assert.equal(gradePhysicsPractical({ppe:true,prepared:true,isolatedDuringWiring:true,correctMeters:true,measurements:[measurements[0]],notes:'A single topology cannot establish comparative network behavior.'}).passed,false);
 assert.equal(gradePhysicsPractical({ppe:true,prepared:true,isolatedDuringWiring:true,correctMeters:true,measurements,notes:'We analyzed both circuit networks and identified resistive power.',unsafeAction:true}).score,0);
-console.log('56 scientific and scoring assertions passed.');
+console.log('55 scientific and scoring assertions passed.');
