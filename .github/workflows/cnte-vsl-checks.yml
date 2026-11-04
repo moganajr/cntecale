@@ -47,6 +47,8 @@ jobs:
           node --check src/equipmentEngine.js
           node --check src/equipmentWorkshop.js
           node --check src/serviceMechanics.js
+          node --check src/spatialAssembly.js
+          node --check tests/spatial.test.mjs
           node --check src/serviceLive.js
           node --check tests/service.test.mjs
           node --check tests/equipment.test.mjs
