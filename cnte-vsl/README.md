@@ -106,3 +106,14 @@ Workflow: select PPE, inspect microscope, switch on light, select slide, center 
 Optical approximations use total magnification = eyepiece × objective and field diameter = eyepiece field number (18 mm) ÷ objective magnification. Cell counts are illustrative—not scientific counts of real microscopic samples. A separate 3D mesh provides the instrument visualization rather than photorealistic optics. This is an educational practice simulator pending specialist, curriculum, and accessibility validation; no physical microscopy competency is certified.
 
 **Verification:** 71 scientific/scoring assertions passed in an isolated JavaScript execution harness. JavaScript syntax checks passed for the new modules, but full browser QA and GitHub Actions execution have not been confirmed. No live CNTE/CALE backend connection or production release has occurred.
+
+
+## Version 0.6 — Advanced synthetic hematology laboratory
+
+Added a seventh laboratory module, **Advanced Hematology & Three-Level QC**, alongside the existing introductory hemoglobin analyzer demonstration. The new training workstation includes: virtual pre-analytical specimen identity and acceptance checks, instrument readiness, three illustrative QC levels (low, normal, high), QC failure and result-release gating, three synthetic case datasets, and automated red-cell index calculations (MCV, MCH, MCHC). Students must release at least two distinct simulated specimens after all three control levels pass to meet the practice-pass conditions.
+
+The 100-point internal assessment comprises PPE/biosafety (15), specimen identification (10), acceptance checks (10), analyzer readiness (10), three-level QC (25), specimen measurement (15), and interpretation (15). The report is retained in the local browser portfolio and may be exported as JSON; it does **not** sync to CNTE/CALE yet.
+
+**Scientific and safety limits:** all data are synthetic, instrument display is a schematic rather than a validated device emulator, and QC acceptance limits are illustrative, not manufacturer instructions or clinical reference intervals. No real patient data should be entered. The platform does not provide diagnoses, authorize test results, or certify physical laboratory competence. Pending qualified medical laboratory scientist, biosafety, curriculum, and end-to-end browser review.
+
+**Verification:** all 92 scientific and scoring assertions passed in an isolated JavaScript assertion harness. Syntax checks passed for the medical modules and integrated app. GitHub Actions and full browser-execution status have not been independently confirmed, and the development branch is not deployed to production.
