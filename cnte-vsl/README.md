@@ -272,3 +272,16 @@ The engine's three test suites pass **841 checks** in an isolated JavaScript har
 ### Realism limits and subsequent engineering
 
 Current objects are stylized 3D projections of box-based apparatus parts. The dotted mount guide, coordinate inputs, and idealized snap operation implement **discrete logical docking**, not accurate friction, torque, haptics, spatial tracking, collision response, physical calibration, or verified anatomical/medical instrument geometries. Subsequent phases should use validated meshes, true six-degree-of-freedom controller interactions, physics constraints, accessible manipulation alternatives, and specialist curriculum/safety approval. **No external virtual laboratory has been integrated, and live CNTE production files remain unmodified.**
+
+
+## Version 1.2 — Constraint-based equipment repair and diagnostic responses
+
+The advanced live equipment workshop now uses a self-built `physicalConstraints.js` engine with conservative axis-aligned 3D bounding-box checks, a collision-aware **move** operation for removed parts, equipment-specific connector types, and synthetic operating responses. Students must explicitly position a virtual service driver or correct repair tool against the selected component before turning a fastener or repairing a fault. After repair and aligned installation, the learner must restore the model's correct connector and secure fasteners before a simulated functional test can pass.
+
+Twelve equipment systems share the engine, with distinct educational connection types: electrical, fluid, optical, sample-fluid, mechanical, and airflow. The classroom displays a digital-tool-contact indicator, connector status and a domain-specific diagnostic message. Lecturers observe the same server-authoritative state in real time through the existing independent room system. Earlier 360-degree rotation, transparency, parts labeling, dismantling, spatial docking, self-running procedure guidance, local training videos, and separate lecturer/student demonstrations remain in the branch.
+
+**Scientific limitations:** Bounding boxes, service contacts and connectors are teaching approximations only. The simulation does **not** yet include manufacturer CAD, articulated mechanisms, rigid-body dynamics, fluid simulation, calibrated electrical circuits, clinical medical device functions, force/torque sensor feedback, or fully tracked WebXR AR/VR interactions. The functional responses are explicitly **synthetic**, not medical diagnoses, real instrument measurements, or authority to service physical equipment.
+
+**Validation:** Four local JavaScript model test suites passed **1,002 checks** in aggregate: 246 equipment, 249 spatial docking, 394 servicing and 113 collision/connector response assertions. The live UI and live server files passed syntax parsing. GitHub Actions now includes these tests. A real HTTP/WebSocket integration test, browser acceptance test, live hosting, medical/safety expert review and standards accreditation are not yet confirmed.
+
+The project remains self-built with no third-party virtual laboratory integration and no production CNTE/CALE branch changes.
