@@ -95,3 +95,14 @@ The titration workbench now adds a calibration/eye-level meniscus check, initial
 - Both network configurations must be measured for practice pass.
 
 Limitations: ideal resistor model; 3D shapes illustrate apparatus rather than physical freehand wire manipulation. Not certified physical or high-stakes training. 55 assertions passed in the local JavaScript test harness; remote CI and end-to-end browser tests remain unconfirmed. CNTE production main branch unchanged.
+
+
+## Version 0.5 — Advanced biology microscopy
+
+The biology catalog now contains **two** experiments: the original potato osmosis model and a new microscopy/cell-identification practical. The new practical includes a rotatable 3D compound-light microscope teaching illustration, synthetic slide fields (onion epidermis, human cheek epithelium, leaf stomata), 10× eyepiece and 4×/10×/40× objective controls, approximate field diameter and estimated cell counts, fine-focus control, stage centering, illumination, and identification of specimen structures. A synthetic field of view responds to focus, stage offset and objective selection; it is **not** a real photomicrograph or clinical diagnostic product.
+
+Workflow: select PPE, inspect microscope, switch on light, select slide, center stage, adjust focus, identify all relevant structures, save observations, then compare at least two unique specimens in the laboratory report. An observation is accepted only when the view is focused/centered, equipment preparation is complete, illumination is on and all correct features are identified without extraneous labels. The 100-point practice rubric covers safety (10), preparation (15), illumination (10), centering (10), focus (20), specimen identification (20) and reporting (15); a passing grade additionally requires two distinct identified specimens.
+
+Optical approximations use total magnification = eyepiece × objective and field diameter = eyepiece field number (18 mm) ÷ objective magnification. Cell counts are illustrative—not scientific counts of real microscopic samples. A separate 3D mesh provides the instrument visualization rather than photorealistic optics. This is an educational practice simulator pending specialist, curriculum, and accessibility validation; no physical microscopy competency is certified.
+
+**Verification:** 71 scientific/scoring assertions passed in an isolated JavaScript execution harness. JavaScript syntax checks passed for the new modules, but full browser QA and GitHub Actions execution have not been confirmed. No live CNTE/CALE backend connection or production release has occurred.
