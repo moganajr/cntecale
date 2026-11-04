@@ -73,13 +73,13 @@ export function actEquipment(state,action){const m=EQUIPMENT[state.equipmentId];
   if(!s.safe)throw Error('Safety lock: isolate the equipment first');
   if(!part||part.fixed)throw Error('Component cannot be removed');
   if(removed.has(part.id))throw Error('Component already removed');
-  const dependents=m.parts.filter(p=>!removed.has(p.id)&&p.prerequisites?.includes(part.id));
-  if(dependents.length)throw Error('Remove dependent component first: '+dependents[0].label);
+  const blockers=(part.prerequisites||[]).filter(id=>!removed.has(id));
+  if(blockers.length)throw Error('Remove protective/cover component first: '+blockers[0]);
   removed.add(part.id);break;
  case 'install':
   if(!s.safe)throw Error('Safety lock: isolate the equipment first');
   if(!part||!removed.has(part.id))throw Error('Component not available for reassembly');
-  if((part.prerequisites||[]).some(id=>removed.has(id)))throw Error('Reassemble supporting parts first');
+  if(m.parts.some(p=>removed.has(p.id)&&p.prerequisites?.includes(part.id)))throw Error('Reassemble internal parts before closing the outer component');
   removed.delete(part.id);break;
  case 'repair':
   if(!s.safe)throw Error('Safety lock: isolate equipment before repair');
