@@ -7,7 +7,7 @@ const PORT=20000+Math.floor(Math.random()*20000);
 const base='http://127.0.0.1:'+PORT,wsBase='ws://127.0.0.1:'+PORT,PREVIEW_KEY='integration-test-access-key-123456';
 const child=spawn(process.execPath,['live-server/server.js'],{cwd:new URL('..',import.meta.url).pathname,env:{...process.env,PORT:String(PORT),HOST:'127.0.0.1',LIVE_PREVIEW_KEY:PREVIEW_KEY},stdio:['ignore','pipe','pipe']});
 let stderr='';child.stderr.on('data',d=>stderr+=d.toString());
-let teacher,student,passed=0;
+let teacher,student,equipmentTeacher,equipmentStudent,passed=0;
 const check=(condition,label)=>{assert.ok(condition,label);passed++};
 const api=async(path,body)=>{const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json','X-CNTE-Preview-Key':PREVIEW_KEY},body:JSON.stringify(body)});return {status:r.status,data:await r.json()}};
 function onOpen(socket){return new Promise((resolve,reject)=>{socket.once('open',resolve);socket.once('error',reject);setTimeout(()=>reject(Error('WebSocket connection timed out')),5000)})}
@@ -53,7 +53,34 @@ try{
  const demoReset=nextMessage(student,d=>d.type==='snapshot'&&d.demo?.ppe===false);
  teacher.send(JSON.stringify({type:'reset_demo'}));
  await demoReset;check(true,'lecturer resets shared demonstration');
- console.log(passed+' HTTP/WebSocket integration assertions passed.');
+ const equipmentRoom=await api('/api/rooms',{name:'TVET Instructor',mode:'equipment',equipmentId:'electrical-panel'});
+ check(equipmentRoom.status===201,'lecturer creates an equipment workshop');
+ const equipmentJoin=await api('/api/rooms/'+equipmentRoom.data.room+'/join',{name:'TVET Apprentice'});
+ check(equipmentJoin.status===201,'student joins equipment workshop');
+ equipmentTeacher=new WebSocket(wsBase+'/live?room='+equipmentRoom.data.room+'&token='+equipmentRoom.data.token);
+ await onOpen(equipmentTeacher);
+ equipmentStudent=new WebSocket(wsBase+'/live?room='+equipmentRoom.data.room+'&token='+equipmentJoin.data.token);
+ await onOpen(equipmentStudent);
+ const equipmentChange=nextMessage(equipmentTeacher,d=>d.type==='snapshot'&&d.serviceParticipants.some(p=>p.id===equipmentJoin.data.id&&p.service.operations.length===1));
+ equipmentStudent.send(JSON.stringify({type:'equipment_action',action:{kind:'inspect',part:'fuse'}}));
+ const changed=await equipmentChange;
+ check(changed.serviceParticipants[0].service.state.faultDetected===true,'instructor sees student equipment diagnostic action');
+ const instructorDemo=nextMessage(equipmentStudent,d=>d.type==='snapshot'&&d.serviceDemo?.operations.length===1);
+ equipmentTeacher.send(JSON.stringify({type:'equipment_demo_action',action:{kind:'inspect',part:'fuse'}}));
+ await instructorDemo;
+ check(true,'student receives live lecturer equipment demonstration');
+ const pauseEquipment=nextMessage(equipmentStudent,d=>d.type==='snapshot'&&d.serviceParticipants[0]?.service.locked===true);
+ equipmentTeacher.send(JSON.stringify({type:'pause',studentId:equipmentJoin.data.id,value:true}));
+ await pauseEquipment;
+ const prevented=nextMessage(equipmentStudent,d=>d.type==='error'&&/paused/.test(d.message));
+ equipmentStudent.send(JSON.stringify({type:'equipment_action',action:{kind:'inspect',part:'cover'}}));
+ await prevented;
+ check(true,'paused student cannot change equipment');
+ const resetEquip=nextMessage(equipmentTeacher,d=>d.type==='snapshot'&&d.serviceParticipants.some(p=>p.service.operations.length===0&&!p.service.locked));
+ equipmentTeacher.send(JSON.stringify({type:'reset_learner',studentId:equipmentJoin.data.id}));
+ await resetEquip;
+ check(true,'lecturer can reset equipment for repeated training');
+ console.log(passed+' chemistry and equipment HTTP/WebSocket integration assertions passed.');
 }finally{
- teacher?.close();student?.close();child.kill('SIGTERM');
+ teacher?.close();student?.close();equipmentTeacher?.close();equipmentStudent?.close();child.kill('SIGTERM');
 }
