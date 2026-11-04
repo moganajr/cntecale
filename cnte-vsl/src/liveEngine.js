@@ -23,7 +23,7 @@ export function applyBenchAction(bench,action,options={}){if(!action||typeof act
    if(!b.indicator||!b.calibrated||!b.flask)throw Error('Prepare the apparatus and indicator');
    const observed=Number(action.reading);
    if(!Number.isFinite(observed)||Math.abs(observed-b.volume)>.11)throw Error('Meniscus reading does not match the burette');
-   if(b.trials.length&&b.trials[b.trials.length-1].sealed===false)throw Error('Finish the existing trial');
+   if(b.trialSealed)throw Error('This trial was already recorded; prepare the next trial');
    const endpoint=expectedVolume(),accepted=Math.abs(b.volume-endpoint)<=.25;
    b.trials.push({number:b.trials.length+1,volume:b.volume,reading:observed,accepted,sealed:true});b.trialSealed=true;
    break}
