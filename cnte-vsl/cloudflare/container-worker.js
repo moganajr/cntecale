@@ -25,11 +25,10 @@ export class VslContainer extends DurableObject {
     const url = new URL(request.url);
     url.protocol = "http:";
     url.host = "container";
-    const headers = new Headers(request.headers);
-    headers.delete("host");
-    headers.delete("X-CNTE-VSL-Bridge");
-    headers.set("X-CNTE-Preview-Key", this.env.CNTE_VSL_BRIDGE_KEY);
-    const forwarded = new Request(url, { method: request.method, headers, body: request.body, redirect: "manual", duplex: "half" });
+    const forwarded = new Request(url, request);
+    forwarded.headers.delete("host");
+    forwarded.headers.delete("X-CNTE-VSL-Bridge");
+    forwarded.headers.set("X-CNTE-Preview-Key", this.env.CNTE_VSL_BRIDGE_KEY);
     return this.ctx.container.getTcpPort(PORT).fetch(forwarded);
   }
   async startAndWait() {
