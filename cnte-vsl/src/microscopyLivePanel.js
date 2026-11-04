@@ -9,6 +9,7 @@ function viewSvg(s){
  }).join('');
  const blur=Math.min(12,x.error*.35);return `<svg viewBox="0 0 320 320" role="img" aria-label="Synthetic teaching slide: ${esc(TEACHING_SLIDES[s.slide].label)} at ${x.magnification} times total magnification"><defs><clipPath id="cnte-fov"><circle cx="160" cy="160" r="140"/></clipPath><filter id="cnte-defocus"><feGaussianBlur stdDeviation="${blur}"/></filter></defs><circle cx="160" cy="160" r="143" fill="#273d56"/><g clip-path="url(#cnte-fov)"><rect x="18" y="18" width="284" height="284" fill="${s.illumination&&s.prepared?'#f7e9f2':'#374457'}"/><g opacity="${s.illumination&&s.prepared?'1':'.08'}" filter="url(#cnte-defocus)" transform="translate(${s.centered?0:60},${s.centered?0:-35})">${shapes}</g></g><text x="160" y="307" text-anchor="middle" fill="#fff" font-size="12">${x.magnification}× · ${x.ready?'Focused / centered':'Adjust preparation, stage or focus'}</text></svg>`;
 }
+export function microscopyReadonlyPreview(s){return `<div class="micro-field" aria-label="Lecturer microscope field in real time">${viewSvg(s)}</div>`;}
 export function microscopyPanel(s){
  const m=s.microscopy,x=evaluateSyntheticView(m);
  return `<div class="clinical-microscopy"><h4>Synthetic microscopy field and controls</h4><div class="micro-layout"><div class="micro-field">${viewSvg(m)}</div><div>
