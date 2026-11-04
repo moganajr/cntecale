@@ -49,6 +49,9 @@ jobs:
           node --check src/serviceMechanics.js
           node --check src/spatialAssembly.js
           node --check src/physicalConstraints.js
+          node --check src/medicalProcedure.js
+          node --check src/medicalLivePanel.js
+          node --check tests/medicalProcedure.test.mjs
           node --check tests/physical.test.mjs
           node --check tests/spatial.test.mjs
           node --check src/serviceLive.js
