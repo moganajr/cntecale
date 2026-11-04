@@ -101,7 +101,22 @@ try{
  const medicalBlocked=nextMessage(medicalStudent,d=>d.type==='error'&&/paused/.test(d.message));
  medicalStudent.send(JSON.stringify({type:'medical_action',action:{kind:'identity',value:true}}));
  await medicalBlocked;check(true,'lecturer pause blocks learner medical procedure');
- console.log(passed+' chemistry, equipment and medical HTTP/WebSocket integration assertions passed.');
+ const microscopeRoom=await api('/api/rooms',{name:'Microscopy Instructor',mode:'equipment',equipmentId:'field-microscope'});
+ check(microscopeRoom.status===201,'instructor creates microscopy training room');
+ const microscopeJoin=await api('/api/rooms/'+microscopeRoom.data.room+'/join',{name:'Microscopy Learner'});
+ check(microscopeJoin.status===201,'microscopy learner joins');
+ const microscopeTeacher=new WebSocket(wsBase+'/live?room='+microscopeRoom.data.room+'&token='+microscopeRoom.data.token);
+ await onOpen(microscopeTeacher);
+ const microscopeStudent=new WebSocket(wsBase+'/live?room='+microscopeRoom.data.room+'&token='+microscopeJoin.data.token);
+ await onOpen(microscopeStudent);
+ const microUpdate=nextMessage(microscopeTeacher,d=>d.type==='snapshot'&&d.medicalParticipants.some(p=>p.id===microscopeJoin.data.id&&p.procedure?.microscopy?.slide==='stain'));
+ microscopeStudent.send(JSON.stringify({type:'medical_action',action:{kind:'slide-select',slide:'stain'}}));
+ await microUpdate;check(true,'lecturer sees student synthetic slide selection');
+ const microDemo=nextMessage(microscopeStudent,d=>d.type==='snapshot'&&d.medicalDemo?.microscopy?.slide==='tissue');
+ microscopeTeacher.send(JSON.stringify({type:'medical_demo_action',action:{kind:'slide-select',slide:'tissue'}}));
+ await microDemo;check(true,'student sees lecturer microscopy demonstration');
+ microscopeTeacher.close();microscopeStudent.close();
+ console.log(passed+' chemistry, equipment, medical and microscopy HTTP/WebSocket integration assertions passed.');
 }finally{
  teacher?.close();student?.close();equipmentTeacher?.close();equipmentStudent?.close();medicalTeacher?.close();medicalStudent?.close();child.kill('SIGTERM');
 }
