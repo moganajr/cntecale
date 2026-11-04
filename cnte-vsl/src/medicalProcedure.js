@@ -2,14 +2,16 @@
  * Training-only deterministic scenarios: never real patient samples, diagnosis or treatment.
  */
 import {assessControl,qualityGate,analyzeSyntheticSample,QC_LEVELS,TRAINING_SAMPLES} from './medicalLab.js';
+import {newMicroscopyStation,microscopyAction,microscopyGrade} from './diagnosticMicroscopy.js';
 export const MEDICAL_SCENARIOS={
  'hematology-analyzer':{title:'Synthetic hematology workflow',kind:'hematology',steps:['ppe','identity','accept','load','qc','run','interpret']},
  'centrifuge':{title:'Simulated centrifuge balance and rotor safety',kind:'centrifuge',steps:['ppe','identity','balance','lid','run','interpret']},
- 'medical-ventilator':{title:'Respiratory equipment bench-check (no patient)',kind:'respiratory',steps:['ppe','circuit','filter','leak','test','interpret']}
+ 'medical-ventilator':{title:'Respiratory equipment bench-check (no patient)',kind:'respiratory',steps:['ppe','circuit','filter','leak','test','interpret']},
+ 'field-microscope':{title:'Synthetic diagnostic microscopy and slide identification',kind:'microscopy',steps:['ppe','prepare','light','center','objective','focus','observe','interpret']}
 };
 export function freshMedicalProcedure(equipmentId){
  if(!MEDICAL_SCENARIOS[equipmentId])throw Error('Unsupported medical exercise');
- return {equipmentId,ppe:false,identity:false,accepted:false,loaded:false,controls:{},qcChoice:'normal',sampleId:'A',readings:[],reports:[],balanced:false,rotorSecured:false,lidClosed:false,spinRpm:0,cycleComplete:false,circuitConnected:false,filterInspected:false,leakPassed:false,benchPassed:false,interpretation:'',actions:[],safetyStops:0};
+ return {equipmentId,ppe:false,identity:false,accepted:false,loaded:false,controls:{},qcChoice:'normal',sampleId:'A',readings:[],reports:[],balanced:false,rotorSecured:false,lidClosed:false,spinRpm:0,cycleComplete:false,circuitConnected:false,filterInspected:false,leakPassed:false,benchPassed:false,interpretation:'',microscopy:newMicroscopyStation(),actions:[],safetyStops:0};
 }
 const record=(s,action)=>{s.actions.push({kind:action.kind,at:Date.now(),value:action.value??null});if(s.actions.length>150)s.actions.shift();return s};
 export function medicalAction(procedure,action){
@@ -18,6 +20,11 @@ export function medicalAction(procedure,action){
  const s={...procedure,controls:{...procedure.controls},readings:[...procedure.readings],reports:[...procedure.reports],actions:[...procedure.actions]};
  const scenario=MEDICAL_SCENARIOS[s.equipmentId].kind;
  const requirePpe=()=>{if(!s.ppe)throw Error('Complete synthetic PPE and biosafety check first')};
+ if(scenario==='microscopy'&&['slide-select','slide-prepare','slide-light','slide-center','slide-objective','slide-focus','slide-observe'].includes(action.kind)){
+   const kind=({ 'slide-select':'select','slide-prepare':'prepare','slide-light':'light','slide-center':'center','slide-objective':'objective','slide-focus':'focus','slide-observe':'observe' })[action.kind];
+   s.microscopy=microscopyAction(s.microscopy,{kind,slide:action.slide,value:action.value,structures:action.structures},{ppe:s.ppe});
+   return record(s,action);
+ }
  switch(action.kind){
   case 'ppe':s.ppe=action.value===true;break;
   case 'identity':requirePpe();s.identity=action.value===true;break;
@@ -27,6 +34,7 @@ export function medicalAction(procedure,action){
   case 'qc':if(scenario!=='hematology')throw Error('QC is not part of this training exercise');requirePpe();if(!s.loaded)throw Error('Load a synthetic training specimen first');s.controls[action.level]=assessControl(action.level,action.value);s.reports=[];s.readings=[];break;
   case 'run':{
    requirePpe();
+   if(scenario==='microscopy')throw Error('Use microscope controls to record synthetic slide observations');
    if(scenario==='hematology'){
     if(!s.loaded||!s.identity||!s.accepted)throw Error('Complete specimen identification and acceptance');
     const x=analyzeSyntheticSample(s.sampleId,s.controls,{identityVerified:s.identity,specimenAccepted:s.accepted,analyzerReady:true});
@@ -55,6 +63,10 @@ export function medicalAction(procedure,action){
 }
 export function medicalPracticalAssessment(s){
  const kind=MEDICAL_SCENARIOS[s.equipmentId]?.kind;if(!kind)throw Error('Invalid medical scenario');
+ if(kind==='microscopy'){
+  const grade=microscopyGrade(s.microscopy,{ppe:s.ppe,interpretation:s.interpretation});
+  return {...grade,mode:kind,completed:grade.observations>=2,score:s.safetyStops?0:grade.score,passed:grade.passed&&!s.safetyStops};
+ }
  const safety=s.ppe?15:0;
  let preparation=0,procedure=0,measurements=0;
  if(kind==='hematology'){preparation=(s.identity?10:0)+(s.accepted?10:0)+(s.loaded?10:0);procedure=qualityGate(s.controls).passed?25:0;measurements=s.reports.length>=2?15:s.reports.length?8:0}
