@@ -63,5 +63,5 @@ export function medicalPracticalAssessment(s){
  const interpretation=s.interpretation.trim().length>=30?15:0;
  const score=s.safetyStops?0:safety+preparation+procedure+measurements+interpretation;
  const completed=kind==='hematology'?s.ppe&&s.identity&&s.accepted&&s.loaded&&s.reports.length>=2&&qualityGate(s.controls).passed:kind==='centrifuge'?s.ppe&&s.identity&&s.balanced&&s.rotorSecured&&s.lidClosed&&s.cycleComplete:s.ppe&&s.circuitConnected&&s.filterInspected&&s.leakPassed&&s.benchPassed;
- return {score,passed:score>=70&&completed&&!s.safetyStops,parts:{safety,preparation,procedure,measurements,interpretation},completed,simulationOnly:true,mode:kind};
+ return {score,passed:score>=70&&completed&&interpretation===15&&!s.safetyStops,parts:{safety,preparation,procedure,measurements,interpretation},completed,simulationOnly:true,mode:kind};
 }
