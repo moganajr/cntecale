@@ -44,6 +44,15 @@ try{
  const rejected=nextMessage(student,d=>d.type==='error'&&/paused/i.test(d.message));
  student.send(JSON.stringify({type:'action',action:{kind:'place',item:'burette'}}));
  await rejected;check(true,'paused workbench cannot be manipulated');
+ const resetSnapshot=nextMessage(student,d=>d.type==='snapshot'&&d.participants[0]?.bench.locked===false&&d.participants[0]?.bench.ppe===false);
+ teacher.send(JSON.stringify({type:'reset_learner',studentId:joined.data.id}));
+ await resetSnapshot;check(true,'lecturer resets a learner workbench');
+ const safetySnapshot=nextMessage(teacher,d=>d.type==='snapshot'&&d.participants.some(p=>p.id===joined.data.id&&p.bench.safetyStops===1));
+ student.send(JSON.stringify({type:'action',action:{kind:'place',item:'flask'}}));
+ await safetySnapshot;check(true,'unsafe equipment handling is visible to lecturer');
+ const demoReset=nextMessage(student,d=>d.type==='snapshot'&&d.demo?.ppe===false);
+ teacher.send(JSON.stringify({type:'reset_demo'}));
+ await demoReset;check(true,'lecturer resets shared demonstration');
  console.log(passed+' HTTP/WebSocket integration assertions passed.');
 }finally{
  teacher?.close();student?.close();child.kill('SIGTERM');
