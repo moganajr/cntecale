@@ -36,3 +36,13 @@ export function bindMedicalPanel(send){
  document.getElementById('clinical-run').onclick=()=>send({kind:'run',rpm:Number(document.getElementById('clinical-rpm')?.value||0)});
  document.getElementById('clinical-save-notes').onclick=()=>send({kind:'interpret',text:document.getElementById('clinical-notes').value});
 }
+
+export function medicalDemoSummary(s){
+ if(!s)return '';
+ const scenario=MEDICAL_SCENARIOS[s.equipmentId],score=medicalPracticalAssessment(s);
+ const latest=s.readings.length?s.readings[s.readings.length-1]:null;
+ return `<section class="panel"><h3>Lecturer's live medical demonstration</h3><p class="muted">${esc(scenario.title)} — the instructor's actions update this view automatically.</p>
+ <div class="note"><b>Simulation status:</b> PPE ${s.ppe?'complete':'pending'} · ${s.actions.length} procedural actions · Practice score ${score.score}/100</div>
+ <div class="note">Latest result: ${latest?esc(JSON.stringify(latest)):'No synthetic measurement yet'}</div>
+ <p class="muted">Observe the instructor's procedure while completing your own independent medical exercise.</p></section>`;
+}
