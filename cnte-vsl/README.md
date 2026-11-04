@@ -326,3 +326,15 @@ The original live Node/WebSocket classroom now uses a shared `classroomCore.js` 
 An additional `classroomCore.test.mjs` suite passes **35 model assertions** covering two independent learners, private snapshot filtering, prohibited role operations, student-specific pause/reset, session revisions, and a separate chemistry room. The HTTP/WebSocket integration test now includes a second student and checks private snapshots, alongside the existing chemistry, repair, medical and microscopy cases. **No successful execution of the full HTTP/WebSocket test against a running server is yet confirmed**; a separate Node host with the `ws` dependency and a two-browser acceptance run remain required.
 
 Read [LIVE_CLASSROOM_QA.md](LIVE_CLASSROOM_QA.md) for the acceptance checklist. The classroom is still a nonproduction, in-memory prototype using demonstration identities and synthetic data, not a deployed, authenticated institutional LMS. No third-party virtual laboratory integration or production CNTE/CALE changes were introduced.
+
+
+## Cloudflare Container preview preparation (November 2026)
+
+A separate development-only deployment configuration has been committed:
+
+- `Dockerfile` and `.dockerignore` for the Node.js 22 HTTP and WebSocket laboratory service.
+- `cloudflare/wrangler.jsonc` and `cloudflare/container-worker.js` for a **non-public** Container-backed Worker (`cnte-vsl-container-dev`) with a single named classroom instance.
+- `.github/workflows/cnte-vsl-container-dev.yml` for Docker, unit and WebSocket integration verification on development-branch pushes; a separate deployment job is disabled unless explicitly approved.
+- [CLOUDFLARE_CONTAINER_DEPLOYMENT.md](CLOUDFLARE_CONTAINER_DEPLOYMENT.md) for Agent Lee's Cloudflare account eligibility, secret configuration, authenticated service binding and acceptance checklist.
+
+**No Cloudflare Container has been deployed or paid plan activated through this source preparation.** The existing `cnte-vsl-proxy` Worker, `cnte.ciu.edu.lr` DNS and Emergent production application were not modified. Do not expose the backend directly or insert bridge secrets into code. The authorized dev preview domain `labs-dev.ciu.edu.lr` remains pending real entitlement, Docker runtime and WebSocket acceptance tests.
