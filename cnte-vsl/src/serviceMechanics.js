@@ -2,17 +2,18 @@
  * Technical training abstraction, not manufacturer-calibrated mechanical physics.
  */
 import {EQUIPMENT,REPAIR_TOOL,newEquipmentState,actEquipment,equipmentStatus} from './equipmentEngine.js';
+import {displacedPose,dockingTarget,evaluateDock,validatePose} from './spatialAssembly.js';
 const finite=(v,name)=>{if(!Number.isFinite(v))throw Error(name+' must be finite');return v};
 export function freshServiceBench(equipmentId='electrical-panel',name='Learner'){
  if(!EQUIPMENT[equipmentId])throw Error('Unknown equipment');
- const state=newEquipmentState(equipmentId);state.safe=false;return {name:String(name).slice(0,60),state,fasteners:{},operations:[],locked:false,submitted:false};
+ const state=newEquipmentState(equipmentId);state.safe=false;return {name:String(name).slice(0,60),state,fasteners:{},poses:{},alignmentChecks:{},operations:[],locked:false,submitted:false};
 }
 export function fastenerState(bench,partId){const model=EQUIPMENT[bench.state.equipmentId],part=model.parts.find(p=>p.id===partId);if(!part)throw Error('Unknown part');return bench.fasteners[partId]||{turns:0,secured:true};}
 export function serviceAction(bench,action){
  if(bench.locked||bench.submitted)throw Error('Workbench is paused or submitted');
  if(!action||typeof action!=='object')throw Error('Action required');
  const model=EQUIPMENT[bench.state.equipmentId];const state=bench.state,part=model.parts.find(p=>p.id===action.part);
- const next={...bench,state,fasteners:{...bench.fasteners},operations:[...bench.operations]};
+ const next={...bench,state,fasteners:{...bench.fasteners},poses:{...bench.poses},alignmentChecks:{...bench.alignmentChecks},operations:[...bench.operations]};
  const fixed=x=>Math.round(x*10)/10;
  if(action.kind==='tool-turn'){
   if(!state.safe)throw Error('Isolate equipment before servicing');
@@ -27,9 +28,21 @@ export function serviceAction(bench,action){
   if(!part||part.fixed)throw Error('Select removable component');
   if(fastenerState(next,part.id).turns<4)throw Error('Loosen the component fastener four quarter-turns before lifting');
   next.state=actEquipment(state,action);
+  next.poses[part.id]=displacedPose(state.equipmentId,part.id);
+  delete next.alignmentChecks[part.id];
+ }else if(action.kind==='align'){
+  if(!state.safe)throw Error('Isolate equipment before alignment');
+  if(!part||!state.removed.includes(part.id))throw Error('Remove this component before aligning');
+  const pose=validatePose(action.pose);
+  next.poses[part.id]=pose;
+  next.alignmentChecks[part.id]=evaluateDock(state.equipmentId,part.id,pose);
  }else if(action.kind==='install'){
+  if(!part||!state.removed.includes(part.id))throw Error('Remove component before installing');
+  if(!next.alignmentChecks[part.id]?.aligned)throw Error('Align the part position and rotation within the 3D docking tolerance before installation');
   next.state=actEquipment(state,action);
   if(part&&!part.fixed)next.fasteners[part.id]={turns:4,secured:false};
+  next.poses[part.id]=dockingTarget(state.equipmentId,part.id);
+  delete next.alignmentChecks[part.id];
  }else if(action.kind==='inspect'||action.kind==='repair'||action.kind==='isolate'||action.kind==='rotate'||action.kind==='transparent'||action.kind==='labels'||action.kind==='exploded'){
   if(action.kind==='rotate')finite(action.degrees,'Angle');
   next.state=actEquipment(state,action);
