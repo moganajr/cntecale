@@ -57,7 +57,7 @@ function render(){root.innerHTML=viewHtml();wireShapes();document.getElementById
  for(const [id,kind] of [['view-transparent','transparent'],['view-exploded','exploded'],['view-labels','labels']])document.getElementById(id).onchange=e=>updateVisualOnly(kind,e.target.checked);
  document.getElementById('reset-equip').onclick=()=>{if(confirm('Reset virtual repair progress?')){state=newEquipmentState(equipmentId);render()}};
  document.getElementById('export-equip').onclick=()=>{const blob=new Blob([JSON.stringify({equipment:equipmentId,state,assessment:equipmentAssessment(state),simulationOnly:true},null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download='cnte-vsl-equipment-practice.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1200)};
- const video=document.getElementById('training-video');if(mediaUrl){video.src=mediaUrl;video.load();if(autoplay)video.play().catch(()=>{})}
+ const video=document.getElementById('training-video');if(mediaUrl){video.src=mediaUrl;video.muted=true;video.loop=autoplay;video.load();if(autoplay)video.play().catch(()=>{})}
  document.getElementById('load-video').onchange=e=>{const file=e.target.files?.[0];if(!file)return;if(!file.type.startsWith('video/')){alert('Choose a video file.');return}if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=URL.createObjectURL(file);mediaName=file.name;render()};
  document.getElementById('video-autoplay').onchange=e=>{autoplay=e.target.checked;video.muted=true;video.loop=autoplay;if(autoplay)video.play().catch(()=>{})};
  document.getElementById('remove-video').onclick=()=>{if(mediaUrl)URL.revokeObjectURL(mediaUrl);mediaUrl=null;mediaName='';render()};
