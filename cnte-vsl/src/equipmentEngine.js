@@ -48,7 +48,43 @@ export const EQUIPMENT={
   {id:'slide-holder',label:'Slide holder',position:[.12,-.18,.65],size:[1.3,.17,.95],color:'#c2a36b'},
   {id:'light',label:'Illumination cartridge',role:'fault',position:[.2,-.63,.60],size:[.52,.33,.5],color:'#e8c077',prerequisites:['slide-holder']},
   {id:'battery',label:'Battery compartment',position:[-.4,-.65,-.28],size:[.55,.48,.45],color:'#9fb4bc'}
+ ]},
+ 'irrigation-pump':{discipline:'Agriculture',name:'Irrigation water pump',fault:'impeller',tools:['spanner','impeller-tool','gloves'],parts:[
+  {id:'pump-base',label:'Motor and pump housing',position:[0,0,0],size:[2.7,1.3,1.35],color:'#5a929e',fixed:true},
+  {id:'pump-cover',label:'Pump volute cover',position:[.83,.15,.71],size:[1.03,1.12,.2],color:'#a8cbd5'},
+  {id:'impeller',label:'Damaged pump impeller',role:'fault',position:[.85,.15,.45],size:[.7,.7,.18],color:'#d7ae59',prerequisites:['pump-cover']},
+  {id:'seal',label:'Mechanical shaft seal',position:[.35,.13,.43],size:[.32,.36,.30],color:'#d28f79',prerequisites:['pump-cover','impeller']},
+  {id:'motor-terminal',label:'Motor terminal box',position:[-.8,.8,.08],size:[.65,.45,.5],color:'#698ca2'}
+ ]},
+ 'computer-workstation':{discipline:'Computer Science / Electronics',name:'Desktop computer system unit',fault:'ram-module',tools:['insulated-driver','antistatic-kit','module-puller'],parts:[
+  {id:'case',label:'Computer chassis',position:[0,0,0],size:[2,2.1,1.35],color:'#475f78',fixed:true},
+  {id:'side-panel',label:'Removable side panel',position:[0,0,.76],size:[1.92,2.01,.12],color:'#91b2c0'},
+  {id:'ram-module',label:'Memory (RAM) module',role:'fault',position:[.55,.42,.64],size:[.21,.84,.2],color:'#5ba17e',prerequisites:['side-panel']},
+  {id:'motherboard',label:'Motherboard assembly',position:[-.23,0,.40],size:[1.36,1.51,.18],color:'#4e968b',prerequisites:['side-panel','ram-module']},
+  {id:'power-unit',label:'Power-supply module',position:[-.48,-.62,.42],size:[.67,.46,.44],color:'#d5a760',prerequisites:['side-panel']}
+ ]},
+ 'sewing-machine':{discipline:'Fashion Design / TVET',name:'Mechanical sewing machine',fault:'needle',tools:['needle-driver','spanner','gloves'],parts:[
+  {id:'base',label:'Sewing-machine base',position:[0,-.9,0],size:[2.8,.35,1.2],color:'#67899b',fixed:true},
+  {id:'body',label:'Machine arm and body',position:[0,.2,0],size:[2.3,1.2,.55],color:'#c2d7dc'},
+  {id:'needle-guard',label:'Needle safety guard',position:[.92,-.56,.35],size:[.40,.52,.22],color:'#e0bd71'},
+  {id:'needle',label:'Damaged sewing needle',role:'fault',position:[.95,-.47,.19],size:[.09,.74,.09],color:'#cc907b',prerequisites:['needle-guard']},
+  {id:'presser-foot',label:'Presser foot',position:[.95,-.99,.20],size:[.37,.14,.38],color:'#799caa',prerequisites:['needle-guard','needle']}
+ ]},
+ 'welding-trainer':{discipline:'Welding / TVET',name:'Welding torch training assembly',fault:'torch-tip',tools:['nozzle-wrench','gloves','insulated-driver'],parts:[
+  {id:'torch-body',label:'Welding torch body',position:[-.3,0,0],size:[1.9,.56,.54],color:'#42667b',fixed:true},
+  {id:'gas-shroud',label:'Torch gas shroud',position:[.85,0,.05],size:[.66,.54,.56],color:'#8cb9c9'},
+  {id:'torch-tip',label:'Worn contact tip',role:'fault',position:[1.28,0,.04],size:[.33,.19,.19],color:'#dbaf64',prerequisites:['gas-shroud']},
+  {id:'liner',label:'Wire liner',position:[-.17,0,.29],size:[1.1,.17,.17],color:'#c58d6b',prerequisites:['gas-shroud','torch-tip']},
+  {id:'cable',label:'Supply cable',position:[-1.42,0,-.01],size:[.61,.30,.29],color:'#7ca1a7'}
+ ]},
+ 'medical-ventilator':{discipline:'Medical / Respiratory Training',name:'Ventilator circuit training unit',fault:'filter',tools:['filter-tool','gloves','calibration-kit'],parts:[
+  {id:'ventilator-frame',label:'Ventilator training chassis',position:[0,0,0],size:[2.2,2.1,1.1],color:'#d0dce2',fixed:true},
+  {id:'access-door',label:'Training circuit access door',position:[.45,0,.64],size:[1.07,1.5,.15],color:'#84b4c1'},
+  {id:'filter',label:'Simulated blocked air filter',role:'fault',position:[.45,.25,.84],size:[.63,.49,.28],color:'#d8ad62',prerequisites:['access-door']},
+  {id:'flow-sensor',label:'Synthetic airflow sensor',position:[-.37,.25,.82],size:[.42,.44,.26],color:'#72a8a8',prerequisites:['access-door']},
+  {id:'circuit-port',label:'Patient circuit connector (simulation)',position:[-.50,-.60,.82],size:[.46,.31,.36],color:'#718da9',prerequisites:['access-door']}
  ]}
+
 };
 export const TOOLS={
  'insulated-driver':'Insulated screwdriver','multimeter':'Digital multimeter','fuse-puller':'Fuse puller',
@@ -57,9 +93,9 @@ export const TOOLS={
  'lens-cleaner':'Lens cleaning kit','lamp-tool':'Lamp servicing tool',
  'probe-tool':'Service probe tool','gloves':'Protective gloves',
  'calibration-kit':'Instrument calibration simulator','rotor-key':'Rotor extraction key',
- 'balance-check':'Balance inspection gauge'
+ 'balance-check':'Balance inspection gauge','impeller-tool':'Impeller removal tool','antistatic-kit':'Electrostatic protection kit','module-puller':'Memory module extraction tool','needle-driver':'Sewing needle service driver','nozzle-wrench':'Welding nozzle spanner','filter-tool':'Respiratory training filter tool'
 };
-export const REPAIR_TOOL={'fuse':'fuse-puller','brush':'brush-tool','stopcock':'seal-tool','lamp':'lamp-tool','sample-probe':'probe-tool','rotor':'rotor-key','light':'lamp-tool'};
+export const REPAIR_TOOL={'fuse':'fuse-puller','brush':'brush-tool','stopcock':'seal-tool','lamp':'lamp-tool','sample-probe':'probe-tool','rotor':'rotor-key','light':'lamp-tool','impeller':'impeller-tool','ram-module':'module-puller','needle':'needle-driver','torch-tip':'nozzle-wrench','filter':'filter-tool'};
 export function newEquipmentState(id){const model=EQUIPMENT[id];if(!model)throw Error('Unknown equipment');return {equipmentId:id,removed:[],faultDetected:false,repaired:[],safe:true,notes:[],history:[],rotation:0,transparent:false,labels:true,exploded:false}}
 function sorted(set){return [...set].sort()}
 export function equipmentStatus(state){const m=EQUIPMENT[state.equipmentId];if(!m)throw Error('Unknown equipment');const missing=new Set(state.removed),faulty=!state.repaired.includes(m.fault);return {assembled:missing.size===0,faulty,safe:state.safe,operational:missing.size===0&&!faulty&&state.safe,removed:sorted(missing),progress:Math.round(100*(m.parts.length-missing.size)/m.parts.length)}}
