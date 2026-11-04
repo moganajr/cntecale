@@ -255,3 +255,20 @@ The live equipment practical starts with **source isolation not yet confirmed**.
 Direct drag-and-drop of component chips between **installed parts** and **removed parts** trays now triggers the same server-validated remove/install actions as accessible buttons, including fastener and dependency gates. Snapping remains logical/sequence-based, not yet true 6-DOF physical alignment.
 
 The expanded equipment and service model tests now pass **492 assertions** (246 equipment and 246 service tests), executed in an isolated JavaScript test harness. An updated WebSocket integration test has been committed for the chemistry and equipment live sessions, but a successful run against a hosted/installed live server has not been confirmed.
+
+
+## Version 1.1 — Spatial part manipulation, docking and guided reassembly
+
+The live equipment service classroom now includes a **spatial alignment stage** before installing detached components. The learner sees the original mounting location, a visual marker for the detached component, and a dashed guide connecting the two. The interface permits editing X/Y/Z coordinates and the part's orientation as well as an optional precision-snap teaching action. Every adjustment is sent to the **self-built live classroom engine**, where the server validates the pose and prevents installing misaligned parts.
+
+All twelve training equipment systems use their individually configured component positions. The illustrative docking tolerance is **0.18 normalized training units** and **12° rotational error**. These values are adjustable software teaching thresholds and have not been validated against any original equipment manufacturer or physical laboratory specifications. The secure reassembly gate still requires service isolation, the correct disassembly order, virtual fastener turns and repair of the damaged part. A prior passed functional test is invalidated if a learner subsequently changes the assembly or servicing state.
+
+The previous 360-degree rotation, transparency/cutaway, component labels, drag-to-remove/return trays, lecturer's live demonstration, independent learner workbenches, feedback, pause/retry controls, educational videos, and the camera/stereo previews remain in the development branch.
+
+### Verification
+
+The engine's three test suites pass **841 checks** in an isolated JavaScript harness: 246 equipment mechanics assertions, 346 service and part-assembly assertions, and 249 spatial pose/docking assertions. Syntax checks passed for the altered application and server files. The GitHub Actions workflow includes the new tests, but remote workflow execution, actual browser testing, and hosted classroom verification remain outstanding.
+
+### Realism limits and subsequent engineering
+
+Current objects are stylized 3D projections of box-based apparatus parts. The dotted mount guide, coordinate inputs, and idealized snap operation implement **discrete logical docking**, not accurate friction, torque, haptics, spatial tracking, collision response, physical calibration, or verified anatomical/medical instrument geometries. Subsequent phases should use validated meshes, true six-degree-of-freedom controller interactions, physics constraints, accessible manipulation alternatives, and specialist curriculum/safety approval. **No external virtual laboratory has been integrated, and live CNTE production files remain unmodified.**
