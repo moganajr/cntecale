@@ -4,7 +4,7 @@ let count=0;
 const eq=(a,b)=>{assert.deepEqual(a,b);count++};
 const yes=(v,label)=>{assert.ok(v,label);count++};
 const fails=(fn)=>{assert.throws(fn);count++};
-eq(Object.keys(EQUIPMENT).length,7);
+eq(Object.keys(EQUIPMENT).length,12);
 eq(Object.keys(TOOLS).length>=10,true);
 for(const [id,model] of Object.entries(EQUIPMENT)){
  let s=newEquipmentState(id);
