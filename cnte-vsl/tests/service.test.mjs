@@ -4,6 +4,7 @@ import {freshServiceBench,fastenerState,serviceAction,serviceAssessment} from '.
 let count=0;const yes=(v,l)=>{assert.ok(v,l);count++},eq=(a,b)=>{assert.deepEqual(a,b);count++},fails=fn=>{assert.throws(fn);count++};
 for(const [id,model] of Object.entries(EQUIPMENT)){
  let b=freshServiceBench(id,'Test student');eq(b.state.equipmentId,id);eq(serviceAssessment(b).passed,false);
+ eq(b.state.safe,false);fails(()=>serviceAction(b,{kind:'tool-turn',part:model.fault,tool:'service-driver',degrees:-90}));b=serviceAction(b,{kind:'isolate',value:true});eq(b.state.safe,true);
  const fault=model.fault,part=model.parts.find(p=>p.id===fault),target=[];
  function walk(partId){const p=model.parts.find(q=>q.id===partId);for(const dep of p.prerequisites||[])if(!target.includes(dep))walk(dep);if(!target.includes(partId))target.push(partId)}
  walk(fault);
