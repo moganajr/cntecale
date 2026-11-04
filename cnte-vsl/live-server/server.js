@@ -43,17 +43,17 @@ wss.on('connection',(ws,req)=>{const query=new URL(req.url,'http://localhost').s
  const client={ws,role,id};room.clients.add(client);tell(ws,{type:'welcome',role,id,room:room.code});announce(room);
  ws.on('message',buffer=>{try{const m=JSON.parse(buffer.toString());if(!m||typeof m!=='object')throw Error('Invalid message');
  if(role==='student'){
-   if(m.type!=='action')throw Error('Students may modify only their own workbench');
-   const kind=String(m.action?.kind||'');
-   const next=applyBenchAction(person.bench,m.action);
-   person.bench=next;
+   if(m.type==='equipment_action'&&room.mode==='equipment')person.service=serviceAction(person.service,m.action);
+   else if(m.type==='action'&&room.mode==='titration')person.bench=applyBenchAction(person.bench,m.action);
+   else throw Error('Unsupported action for this laboratory mode');
  }else if(role==='lecturer'){
-   if(m.type==='demo_action'){room.demo=applyBenchAction(room.demo,m.action)}
+   if(m.type==='equipment_demo_action'&&room.mode==='equipment'){room.serviceDemo=serviceAction(room.serviceDemo,m.action)}
+   else if(m.type==='demo_action'&&room.mode==='titration'){room.demo=applyBenchAction(room.demo,m.action)}
    else if(m.type==='assignment'){if(typeof m.text!=='string'||m.text.trim().length<5||m.text.length>500)throw Error('Assignment must be 5–500 characters');room.assignment=m.text.trim()}
    else if(m.type==='feedback'){if(typeof m.studentId!=='string'||typeof m.text!=='string'||m.text.trim().length<1||m.text.length>400)throw Error('Invalid feedback');const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');for(const socket of student.sockets)tell(socket,{type:'feedback',text:m.text.slice(0,400),lecturer:room.teacherName})}
-   else if(m.type==='pause'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench.locked=!!m.value}
-   else if(m.type==='reset_learner'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench=freshBench(student.name)}
-   else if(m.type==='reset_demo'){room.demo=freshBench('Lecturer demonstration')}
+   else if(m.type==='pause'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench.locked=!!m.value;student.service.locked=!!m.value}
+   else if(m.type==='reset_learner'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench=freshBench(student.name);student.service=freshServiceBench(room.equipmentId,student.name)}
+   else if(m.type==='reset_demo'){room.demo=freshBench('Lecturer demonstration');room.serviceDemo=freshServiceBench(room.equipmentId,'Lecturer demonstration')}
    else throw Error('Unsupported lecturer action');
  }
  announce(room);
