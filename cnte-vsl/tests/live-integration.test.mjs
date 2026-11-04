@@ -39,12 +39,12 @@ try{
  check(secondJoin.status===201,'second student joins same chemistry room');
  secondStudent=new WebSocket(wsBase+'/live?room='+created.data.room+'&token='+secondJoin.data.token);
  await onOpen(secondStudent);
- const otherInitial=nextMessage(secondStudent,d=>d.type==='snapshot'&&d.participants.length===1&&d.participants[0].id===secondJoin.data.id&&d.participants[0].bench.ppe===false);
+ const ownSnapshot=nextMessage(secondStudent,d=>d.type==='snapshot'&&d.participants.length===1&&d.participants[0].id===secondJoin.data.id&&d.participants[0].bench.ppe===true);
  const otherUpdate=nextMessage(teacher,d=>d.type==='snapshot'&&d.participants.some(p=>p.id===secondJoin.data.id&&p.bench.ppe===true));
  secondStudent.send(JSON.stringify({type:'action',action:{kind:'ppe',value:true}}));
  await otherUpdate;check(true,'instructor sees second student action');
- const secondPrivate=await otherInitial.catch(()=>null);
- check(secondPrivate!==null,'second student sees only their own bench');
+ const secondPrivate=await ownSnapshot;
+ check(secondPrivate.participants[0].id===secondJoin.data.id,'second student sees only their own bench');
  const privacyCheck=nextMessage(secondStudent,d=>d.type==='snapshot'&&d.participants.length===1&&d.participants[0].id===secondJoin.data.id);
  student.send(JSON.stringify({type:'action',action:{kind:'ppe',value:true}}));
  await privacyCheck;check(true,'other student never receives classmates private bench records');
