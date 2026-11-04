@@ -27,3 +27,4 @@ jobs:
           node --check src/app.js
           node --check src/science.js
           node --check src/scene3d.js
+          node --check src/titrationPractical.js
