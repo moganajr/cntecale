@@ -31,3 +31,6 @@ jobs:
           node --check src/physicsCircuit.js
           node --check src/physicsWorkbench.js
           node --check src/physics3d.js
+          node --check src/biologyMicroscopy.js
+          node --check src/biologyWorkbench.js
+          node --check src/biology3d.js
