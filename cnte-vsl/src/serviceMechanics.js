@@ -17,7 +17,7 @@ export function serviceAction(bench,action){
  if(action.kind==='tool-turn'){
   if(!state.safe)throw Error('Isolate equipment before servicing');
   if(!part||part.fixed)throw Error('Select removable component');
-  if(action.tool!=='insulated-driver'&&action.tool!=='spanner'&&action.tool!=='lab-clamp'&&action.tool!=='needle-driver'&&action.tool!=='nozzle-wrench'&&action.tool!=='rotor-key')throw Error('Select a compatible mechanical tool');
+  if(action.tool!=='service-driver')throw Error('Use the virtual fastener driver for quarter-turn operations');
   const previous=fastenerState(next,part.id);
   if(!Number.isFinite(action.degrees)||![90,-90].includes(action.degrees))throw Error('Turn by a 90 degree tool action');
   if(state.removed.includes(part.id))throw Error('Cannot turn fastener while part removed');
