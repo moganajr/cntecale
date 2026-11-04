@@ -1,5 +1,10 @@
 name: CNTE-VSL Cloudflare Container (manual, nonproduction)
 on:
+  push:
+    branches: [feature/cnte-virtual-science-labs]
+    paths:
+      - 'cnte-vsl/**'
+      - '.github/workflows/cnte-vsl-container-dev.yml'
   workflow_dispatch:
     inputs:
       deploy_container:
