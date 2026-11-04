@@ -1,7 +1,7 @@
 # CNTE Virtual Science Laboratories — development status
 
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Latest milestone:** v0.8 — collaborative practical classroom pilot  
+**Latest milestone:** v1.0 — guided live equipment repair and reassembly pilot  
 **Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
 ## Existing single-user laboratories (7)
@@ -37,3 +37,14 @@ Read `deploy/README.md`. The service must run as a Node web application (`npm in
 6. Obtain curriculum, scientific and safety review before high-stakes assessment.
 
 See `LIVE_LAB_REQUIREMENTS.md` for **non-negotiable** real practical activity and lecturer supervision expectations.
+
+
+## New v1.0 live equipment servicing
+
+- `equipment-live.html` offers dedicated instructor and student equipment rooms using the existing CNTE-VSL Node/WebSocket service.
+- 12 model catalog, individual student component states, live instructor demonstration and progress supervision, feedback, pause/resume and retries.
+- Confirm isolation before tool use, perform 90-degree fastener-driver turns, remove parts in dependency order, digitally inspect and repair damage, reinstall parts, tighten the fasteners and pass a functional check.
+- Accessible tool and part controls plus drag-and-drop between installed-components and removed-parts trays; 360-degree view and transparency remain available.
+- The scientific engine makes authoritative state decisions; animated geometry remains simplified, not a manufacturer-certified 3D or VR/AR simulation.
+- 492 equipment/mechanical assertions pass in the local JS harness. Server/WebSocket integration test is authored but browser and hosted runtime completion remain unverified.
+- No external laboratory integration and no changes to production `main`.
