@@ -50,10 +50,12 @@ wss.on('connection',(ws,req)=>{const query=new URL(req.url,'http://localhost').s
    else if(m.type==='assignment'){if(typeof m.text!=='string'||m.text.trim().length<5||m.text.length>500)throw Error('Assignment must be 5–500 characters');room.assignment=m.text.trim()}
    else if(m.type==='feedback'){if(typeof m.studentId!=='string'||typeof m.text!=='string'||m.text.trim().length<1||m.text.length>400)throw Error('Invalid feedback');const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');for(const socket of student.sockets)tell(socket,{type:'feedback',text:m.text.slice(0,400),lecturer:room.teacherName})}
    else if(m.type==='pause'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench.locked=!!m.value}
+   else if(m.type==='reset_learner'){const student=room.learners.get(m.studentId);if(!student)throw Error('Learner not found');student.bench=freshBench(student.name)}
+   else if(m.type==='reset_demo'){room.demo=freshBench('Lecturer demonstration')}
    else throw Error('Unsupported lecturer action');
  }
  announce(room);
- }catch(e){tell(ws,{type:'error',message:String(e.message||'Invalid action').slice(0,180)})}});
+ }catch(e){if(e.safetyStop){const target=role==='student'?person.bench:room.demo;target.safetyStops++;target.updatedAt=Date.now();target.events.push({kind:'safety-stop',at:target.updatedAt});announce(room)}tell(ws,{type:'error',message:String(e.message||'Invalid action').slice(0,180)})}});
  ws.on('close',()=>{room.clients.delete(client);if(person.sockets)person.sockets.delete(ws);announce(room)});
 });
 const cleaner=setInterval(()=>{for(const [id,room] of rooms)if(Date.now()-room.created>roomTtl){for(const x of room.clients)x.ws.close(1001,'Classroom expired');rooms.delete(id)}},60000);cleaner.unref();
