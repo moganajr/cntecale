@@ -48,6 +48,8 @@ jobs:
           node --check src/equipmentWorkshop.js
           node --check src/serviceMechanics.js
           node --check src/spatialAssembly.js
+          node --check src/physicalConstraints.js
+          node --check tests/physical.test.mjs
           node --check tests/spatial.test.mjs
           node --check src/serviceLive.js
           node --check tests/service.test.mjs
