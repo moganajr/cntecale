@@ -128,3 +128,34 @@ A learner records simulated readings, submits an evidence-based diagnosis and do
 **Important limitations:** this is an idealized low-voltage instructional model, not a true electrical engineering simulator or a certified electrician qualification. The 3D equipment is an illustrative rotatable model, not physical wire dragging. No real power system should be tested using these simplified instructions. No institutional competency endorsement, official Liberian TVET standard alignment, live CALE backend, or classroom deployment has been validated.
 
 **Verification:** 111 JavaScript scientific and scoring assertions passed in the local source-test harness and the modified files passed syntax checks. GitHub Actions results and a full browser interaction test are not yet independently verified. The application remains on an isolated development branch and has not been deployed to the live CNTE instance.
+
+
+## Version 0.8 — Lecturer/student live practical classroom (development)
+
+**The central product requirement is active scientific practical work rather than videos or visual-only simulations.** See [LIVE_LAB_REQUIREMENTS.md](LIVE_LAB_REQUIREMENTS.md).
+
+This milestone creates a distinct live classroom page, `/live.html`, and a Node.js WebSocket application supporting role-scoped, same-origin realtime chemistry titration. The instructor creates a room and shares its code, broadcasts task instructions, manipulates a shared demonstration bench, monitors separate student benches and scores, sends individual feedback, pauses students and authorizes a clean retry. Students perform simulated apparatus placement (including drag/drop or accessible button input), PPE and safety checks, indicator preparation, burette calibration, stopcock dispensing, meniscus recording, repeated trials, and written explanations. The authoritative event/state model runs on the server, not in an independent learner-only animation.
+
+The instructor and students receive live apparatus volume/pH/trial states, with both a rotatable 3D equipment view and a complementary interactive 2D workbench. The 3D geometry is **not yet** fully physically manipulable; the controls and drop target perform the validated state changes.
+
+### Launch locally
+
+```bash
+cd cnte-vsl
+npm install
+npm test
+npm run test:integration
+npm start
+```
+
+Visit `http://127.0.0.1:8080/live.html` in separate lecturer and student browsers. The Node service must be used for multi-user functionality; a static GitHub Pages copy of `live.html` would not provide live sessions. Refer to [deploy/README.md](deploy/README.md) for protected, separate deployment instructions.
+
+### Preview security and incomplete production capabilities
+
+- Room creation and joining are gated by `LIVE_PREVIEW_KEY` when configured. Hosting on a non-loopback interface refuses to start without an access key of 16 or more characters. Do not commit access keys.
+- Lecturer and learners each have separate random role tokens and workbench permissions. Role identification is still **prototype-specific**, not yet CALE SSO or institutional authorization.
+- Room state, assignments, grades and notes are held in memory. Rooms expire after four hours; server restarts lose evidence. Use synthetic/demonstration names and data exclusively.
+- Shared live work currently supports **titration only**. The other six laboratory modules remain available in the standalone catalog but have not yet been given simultaneous multi-user practical capabilities.
+- Full multi-browser end-to-end verification, specialist review, deployment, and production integration remain pending. The updated automated CI workflow now includes a real HTTP/WebSocket integration test, but CI success has not been verified in this conversation.
+
+**No production CNTE/CALE source files on `main` were changed by this development milestone.**
