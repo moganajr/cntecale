@@ -285,3 +285,22 @@ Twelve equipment systems share the engine, with distinct educational connection 
 **Validation:** Four local JavaScript model test suites passed **1,002 checks** in aggregate: 246 equipment, 249 spatial docking, 394 servicing and 113 collision/connector response assertions. The live UI and live server files passed syntax parsing. GitHub Actions now includes these tests. A real HTTP/WebSocket integration test, browser acceptance test, live hosting, medical/safety expert review and standards accreditation are not yet confirmed.
 
 The project remains self-built with no third-party virtual laboratory integration and no production CNTE/CALE branch changes.
+
+
+## Version 1.3 — Live medical equipment and synthetic procedural training
+
+Version 1.3 extends the **self-built Node/WebSocket lecturer–student workshop** with three additional interactive, simulated clinical-equipment exercises, selected by creating an equipment classroom for the corresponding model:
+
+1. **Synthetic hematology analyzer:** PPE/biosafety, specimen identity and acceptance checks, specimen selection and virtual loading, low/normal/high QC readings, locked result release after passing all QC, calculated synthetic indices, comparison of at least two example specimens, and written interpretation.
+2. **Bench centrifuge:** PPE, virtual tube identity, pair-balancing check, rotor security, protective-lid closure, simulated spin limited to 500–3000 RPM, and documentation.
+3. **Respiratory training unit:** PPE, simulated circuit connection, training filter inspection, synthetic leak check, nonpatient airflow bench test, and reflection. This is not a clinical ventilator simulator or patient treatment aid.
+
+The medical practical panel adds a **draggable virtual specimen/component station** with a mouse/touch-compatible button alternative. Each user operates an independent educational procedure instance, which the server validates. The lecturer can demonstrate the same steps and view individual student progress, send feedback, pause the session and reset attempts. Students receive a live read-only summary of the lecturer's synthetic demonstration. The existing equipment servicing workshop and chemistry live class remain intact.
+
+Each practical has a 100-point synthetic competency rubric. Passing requires the full current set of safety and procedure checks plus a written interpretation of at least 30 characters. Laboratory QC controls are **illustrative** rather than manufacturer-provided or clinically validated; the app deliberately cannot ingest real medical records or release actual diagnostic results.
+
+**Quality checks:** 1,037 equipment/spatial/servicing/physical/medical procedural assertions passed in an isolated JavaScript test harness, including 35 new medical-procedure assertions. Medical live server, UI and WebSocket integration test sources passed JavaScript syntax checks. A multi-user medical WebSocket test was added to CI, but successful execution against a real hosted server and end-to-end browser interaction remain unverified.
+
+**Important limitations:** Actual patient-care competence, centrifuge calibration, hematology instrument maintenance, medical device electrical safety, respiratory therapy, virtual patient treatment, clinical diagnosis, photorealistic tissue/instrument rendering, full six-degree-of-freedom AR/VR, and manufacturer validation are not provided. The equipment geometry remains stylized and scientific values are synthetic. Medical subject-specialist review is mandatory before formal educational assessment. No external virtual laboratory integration and no production CNTE/CALE deployment were performed.
+
+**Next development gate:** run an isolated live server/browser acceptance session with at least one lecturer and two students; validate state consistency, role restrictions, safety blocks, latency and accessibility, then upgrade medical instrument geometry and practical measurements against expert-reviewed training specifications.
