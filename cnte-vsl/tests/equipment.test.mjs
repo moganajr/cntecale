@@ -18,7 +18,7 @@ for(const [id,model] of Object.entries(EQUIPMENT)){
  s=actEquipment(s,{kind:'labels',value:false});eq(s.labels,false);
  const part=model.parts.find(x=>x.id===model.fault);
  if(part.prerequisites?.length)fails(()=>actEquipment(s,{kind:'remove',part:part.id}));
- const toRemove=[...(part.prerequisites||[]),part.id];
+ const toRemove=[];const plan=id=>{const p=model.parts.find(x=>x.id===id);for(const prerequisite of p.prerequisites||[])if(!toRemove.includes(prerequisite))plan(prerequisite);if(!toRemove.includes(id))toRemove.push(id)};plan(part.id);
  for(const component of toRemove){s=actEquipment(s,{kind:'remove',part:component});yes(s.removed.includes(component))}
  fails(()=>actEquipment(s,{kind:'repair',part:model.fault,tool:'wrong-tool'}));
  fails(()=>actEquipment(s,{kind:'repair',part:model.fault,tool:REPAIR_TOOL[model.fault]}));
