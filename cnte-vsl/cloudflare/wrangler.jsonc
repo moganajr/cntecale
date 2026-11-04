@@ -1,0 +1,25 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cnte-vsl-container-dev",
+  "main": "./container-worker.js",
+  "compatibility_date": "2026-11-04",
+  "workers_dev": false,
+  "observability": { "enabled": true },
+  "containers": [
+    {
+      "class_name": "VslContainer",
+      "scheduling_policy": "durable_object",
+      "images": {
+        "base": { "dockerfile": "../Dockerfile" }
+      }
+    }
+  ],
+  "durable_objects": {
+    "bindings": [
+      { "name": "VSL_CONTAINER", "class_name": "VslContainer" }
+    ]
+  },
+  "exports": {
+    "VslContainer": { "type": "durable-object", "storage": "sqlite" }
+  }
+}
