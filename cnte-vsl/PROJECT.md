@@ -1,7 +1,7 @@
 # CNTE Virtual Science Laboratories — development status
 
 **Branch:** `feature/cnte-virtual-science-labs`  
-**Latest milestone:** v1.2 — collision-aware servicing, tool contact, connector checks and synthetic function responses  
+**Latest milestone:** v1.3 — live synthetic hematology, centrifuge and respiratory instrument practicals  
 **Production status:** NOT DEPLOYED. The CNTE/CALE `main` branch remains unchanged.
 
 ## Existing single-user laboratories (7)
@@ -60,3 +60,12 @@ The self-built live repair engine now models per-part attachment locations and a
 ## Version 1.2 additional practical controls
 
 The self-built live workshop now requires tool selection/contact before manual fastener operations or applying digital repairs; collision-aware movements; equipment-specific connector restoration; and synthetic functional response before a practical test can pass. Existing lecturer/student role separation, isolation, 3D positioning and protective-cover sequences remain. Twelve models are supported. Four test groups pass 1,002 assertions; browser and HTTP/WebSocket runtime checks are not yet independently verified. The engine does not claim real CAD, medical instrument calibration, photorealistic 3D, or fully tracked AR/VR.
+
+
+## Version 1.3 — Self-built live medical training
+
+Three interactive procedure engines (synthetic hematology/QC, centrifuge safety, and nonpatient respiratory-equipment bench check) now run through our existing Node/WebSocket lecturer–student classroom. Medical training uses separate individual learner procedural states, a lecturer demonstration state, draggable virtual specimen/component placement with button accessibility, and medical progress summaries visible to lecturers and learners. All actions remain server-validated, and lecturer pause/reset applies to medical exercises. The main dashboard links directly to the live hematology classroom.
+
+The equipment/servicing/spatial/physical/medical model suite passed 1,037 assertions in an isolated JavaScript harness. The medical UI, live server and expanded HTTP/WebSocket test sources passed syntax checks. Actual multi-browser WebSocket test execution, hosting, clinical expert review, headset AR/VR functionality and clinical device calibration are still unverified. This is an instructional prototype with synthetic data and cannot be used for real diagnosis, treatment or physical medical device maintenance.
+
+The system remains entirely self-built: no third-party virtual science laboratory integration; production CNTE/CALE main branch unchanged.
