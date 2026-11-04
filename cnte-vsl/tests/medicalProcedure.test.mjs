@@ -29,7 +29,7 @@ for(const id of Object.keys(MEDICAL_SCENARIOS)){
    s=medicalAction(s,{kind:'rotor',value:true});s=medicalAction(s,{kind:'lid',value:true});
    fails(()=>medicalAction(s,{kind:'run',rpm:8000}));
    s=medicalAction(s,{kind:'run',rpm:1500});
-   s=medicalAction(s,{kind:'interpret',text:'Balanced synthetic tubes, a secured rotor, closed protective lid and a bounded training speed.'));
+   s=medicalAction(s,{kind:'interpret',text:'Balanced synthetic tubes, a secured rotor, closed protective lid and a bounded training speed.'});
    eq(medicalPracticalAssessment(s).score,100);eq(medicalPracticalAssessment(s).passed,true);
    s=medicalAction(s,{kind:'balance',value:false});eq(medicalPracticalAssessment(s).passed,false);
  }else{
@@ -37,7 +37,7 @@ for(const id of Object.keys(MEDICAL_SCENARIOS)){
    fails(()=>medicalAction(s,{kind:'leak',value:true}));
    s=medicalAction(s,{kind:'filter',value:true});s=medicalAction(s,{kind:'leak',value:true});
    s=medicalAction(s,{kind:'run'});
-   s=medicalAction(s,{kind:'interpret',text:'This is a nonpatient, synthetic respiratory training bench check and not a clinical ventilator calibration.'));
+   s=medicalAction(s,{kind:'interpret',text:'This is a nonpatient, synthetic respiratory training bench check and not a clinical ventilator calibration.'});
    eq(medicalPracticalAssessment(s).score,100);eq(medicalPracticalAssessment(s).passed,true);
    s=medicalAction(s,{kind:'leak',value:false});eq(medicalPracticalAssessment(s).passed,false);
  }
