@@ -1,0 +1,17 @@
+import assert from 'node:assert/strict';
+import {LABS,titration,ohmsLaw,osmosis,hemoglobinQc,electrical,scoreAttempt} from '../src/science.js';
+assert.equal(LABS.length,5);
+assert.equal(titration(25,.1,25),.1);
+assert.equal(titration(25,.1,12.5),.05);
+assert.equal(ohmsLaw(12,100),.12);
+assert.throws(()=>ohmsLaw(2,0));
+assert.equal(osmosis(10,5).changePercent,0);
+assert.ok(Math.abs(osmosis(0,5).finalMass-5.6)<1e-10);
+assert.equal(hemoglobinQc(13.6,13.5,.5).pass,true);
+assert.equal(hemoglobinQc(15,13.5,.5).pass,false);
+assert.equal(electrical(12,6,'open').current,0);
+assert.equal(electrical(12,6,'short').safeToEnergize,false);
+assert.equal(electrical(12,6,'none').current,2);
+assert.equal(scoreAttempt({ppe:true,prepared:true,procedure:true,recorded:true,interpretation:true}).score,100);
+assert.equal(scoreAttempt({ppe:true,prepared:true,procedure:true,recorded:true,interpretation:true,safetyFail:true}).score,0);
+console.log('14 scientific and scoring assertions passed.');
