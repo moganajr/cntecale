@@ -46,6 +46,9 @@ jobs:
           node --check src/live.js
           node --check src/equipmentEngine.js
           node --check src/equipmentWorkshop.js
+          node --check src/serviceMechanics.js
+          node --check src/serviceLive.js
+          node --check tests/service.test.mjs
           node --check tests/equipment.test.mjs
           node --check live-server/server.js
           node --check tests/live.test.mjs
