@@ -1,0 +1,49 @@
+/** End-to-end development integration: HTTP room setup and WebSocket classroom exchange. */
+import assert from 'node:assert/strict';
+import {spawn} from 'node:child_process';
+import {setTimeout as pause} from 'node:timers/promises';
+import {WebSocket} from 'ws';
+const PORT=20000+Math.floor(Math.random()*20000);
+const base='http://127.0.0.1:'+PORT,wsBase='ws://127.0.0.1:'+PORT;
+const child=spawn(process.execPath,['live-server/server.js'],{cwd:new URL('..',import.meta.url).pathname,env:{...process.env,PORT:String(PORT),HOST:'127.0.0.1'},stdio:['ignore','pipe','pipe']});
+let stderr='';child.stderr.on('data',d=>stderr+=d.toString());
+let teacher,student,passed=0;
+const check=(condition,label)=>{assert.ok(condition,label);passed++};
+const api=async(path,body)=>{const r=await fetch(base+path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});return {status:r.status,data:await r.json()}};
+function onOpen(socket){return new Promise((resolve,reject)=>{socket.once('open',resolve);socket.once('error',reject);setTimeout(()=>reject(Error('WebSocket connection timed out')),5000)})}
+function nextMessage(socket,predicate,timeout=6000){return new Promise((resolve,reject)=>{const timer=setTimeout(()=>{socket.off('message',handler);reject(Error('Timed out waiting for live update'))},timeout);
+ function handler(raw){let message;try{message=JSON.parse(raw.toString())}catch{return}if(predicate(message)){clearTimeout(timer);socket.off('message',handler);resolve(message)}}
+ socket.on('message',handler)})}
+try{
+ let available=false;
+ for(let i=0;i<70;i++){if(child.exitCode!==null)throw Error('Live server exited early: '+stderr);try{const r=await fetch(base+'/api/health');if(r.ok){available=true;break}}catch{}await pause(100)}
+ check(available,'server starts');
+ const created=await api('/api/rooms',{name:'Demonstrating Lecturer'});
+ check(created.status===201&&/^[A-F0-9]{8}$/.test(created.data.room),'lecturer creates room');
+ const joined=await api('/api/rooms/'+created.data.room+'/join',{name:'Laboratory Learner'});
+ check(joined.status===201&&joined.data.role==='student','student joins by code');
+ teacher=new WebSocket(wsBase+'/live?room='+created.data.room+'&token='+created.data.token);
+ await onOpen(teacher);
+ student=new WebSocket(wsBase+'/live?room='+created.data.room+'&token='+joined.data.token);
+ await onOpen(student);
+ const update=nextMessage(teacher,d=>d.type==='snapshot'&&d.participants.some(p=>p.bench.ppe===true));
+ student.send(JSON.stringify({type:'action',action:{kind:'ppe',value:true}}));
+ const teacherData=await update;
+ check(teacherData.participants.some(p=>p.bench.ppe===true),'instructor sees learner actions');
+ const demonstration=nextMessage(student,d=>d.type==='snapshot'&&d.demo?.ppe===true);
+ teacher.send(JSON.stringify({type:'demo_action',action:{kind:'ppe',value:true}}));
+ const studentData=await demonstration;
+ check(studentData.demo.ppe===true,'student sees instructor demonstration');
+ const feedback=nextMessage(student,d=>d.type==='feedback'&&d.text==='Check the meniscus');
+ teacher.send(JSON.stringify({type:'feedback',studentId:joined.data.id,text:'Check the meniscus'}));
+ await feedback;check(true,'private lecturer feedback delivered');
+ const lock=nextMessage(student,d=>d.type==='snapshot'&&d.participants[0]?.bench.locked);
+ teacher.send(JSON.stringify({type:'pause',studentId:joined.data.id,value:true}));
+ await lock;check(true,'instructor can pause learner');
+ const rejected=nextMessage(student,d=>d.type==='error'&&/paused/i.test(d.message));
+ student.send(JSON.stringify({type:'action',action:{kind:'place',item:'burette'}}));
+ await rejected;check(true,'paused workbench cannot be manipulated');
+ console.log(passed+' HTTP/WebSocket integration assertions passed.');
+}finally{
+ teacher?.close();student?.close();child.kill('SIGTERM');
+}
