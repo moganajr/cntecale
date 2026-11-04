@@ -20,8 +20,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Run scientific model tests
+      - name: Install development live-service dependencies
+        run: npm install --no-package-lock --ignore-scripts
+      - name: Run scientific and live-state regression tests
         run: npm test
+      - name: Verify HTTP and WebSocket lecturer/student collaboration
+        run: npm run test:integration
       - name: Validate JavaScript syntax
         run: |
           node --check src/app.js
@@ -38,3 +42,8 @@ jobs:
           node --check src/medicalWorkbench.js
           node --check src/tvetFaults.js
           node --check src/tvetWorkbench.js
+          node --check src/liveEngine.js
+          node --check src/live.js
+          node --check live-server/server.js
+          node --check tests/live.test.mjs
+          node --check tests/live-integration.test.mjs
