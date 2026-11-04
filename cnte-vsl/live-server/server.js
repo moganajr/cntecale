@@ -6,6 +6,8 @@ import {fileURLToPath} from 'node:url';
 import {randomBytes,timingSafeEqual} from 'node:crypto';
 import {WebSocketServer,WebSocket} from 'ws';
 import {freshBench,applyBenchAction,practiceStatus} from '../src/liveEngine.js';
+import {EQUIPMENT} from '../src/equipmentEngine.js';
+import {freshServiceBench,serviceAction,serviceAssessment} from '../src/serviceMechanics.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const port=Number(process.env.PORT||8080),host=process.env.HOST||'127.0.0.1';
 const previewKey=process.env.LIVE_PREVIEW_KEY||'';
@@ -18,9 +20,9 @@ const mime={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=u
 const safeName=s=>typeof s==='string'?s.trim().slice(0,60):'';
 function reply(res,status,payload){res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'});res.end(JSON.stringify(payload))}
 function decodeBody(req){return new Promise((resolve,reject)=>{let data='';req.on('data',b=>{data+=b;if(data.length>8192){reject(Error('Request too large'));req.destroy()}});req.on('end',()=>{try{resolve(JSON.parse(data||'{}'))}catch{reject(Error('Invalid JSON'))}});req.on('error',reject)})}
-function snapshot(room){return {type:'snapshot',room:room.code,assignment:room.assignment,demo:room.demo,participants:[...room.learners.entries()].map(([id,u])=>({id,name:u.name,online:u.sockets.size>0,bench:u.bench,practice:practiceStatus(u.bench)})),updated:Date.now()}}
+function snapshot(room){return {type:'snapshot',room:room.code,assignment:room.assignment,demo:room.demo,mode:room.mode,equipmentId:room.equipmentId,serviceDemo:room.serviceDemo,serviceParticipants:[...room.learners.entries()].map(([id,u])=>({id,name:u.name,online:u.sockets.size>0,service:u.service,assessment:serviceAssessment(u.service)})),participants:[...room.learners.entries()].map(([id,u])=>({id,name:u.name,online:u.sockets.size>0,bench:u.bench,practice:practiceStatus(u.bench)})),updated:Date.now()}}
 function tell(ws,data){if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(data))}
-function announce(room){const data=snapshot(room);for(const c of room.clients)tell(c.ws,c.role==='lecturer'?data:{type:'snapshot',room:room.code,assignment:room.assignment,demo:room.demo,participants:data.participants.filter(p=>p.id===c.id),onlineCount:room.clients.size,updated:data.updated})}
+function announce(room){const data=snapshot(room);for(const c of room.clients)tell(c.ws,c.role==='lecturer'?data:{type:'snapshot',room:room.code,assignment:room.assignment,demo:room.demo,mode:room.mode,equipmentId:room.equipmentId,serviceDemo:room.serviceDemo,serviceParticipants:data.serviceParticipants.filter(p=>p.id===c.id),participants:data.participants.filter(p=>p.id===c.id),onlineCount:room.clients.size,updated:data.updated})}
 const server=http.createServer(async(req,res)=>{const pathname=new URL(req.url,'http://localhost').pathname;
  if(req.method==='GET'&&pathname==='/api/health')return reply(res,200,{status:'ok',prototype:true,rooms:rooms.size});
  if(req.method==='POST'&&pathname.startsWith('/api/rooms')&&!previewAllowed(req))return reply(res,403,{error:'Invalid classroom preview access key'});
