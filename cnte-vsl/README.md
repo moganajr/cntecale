@@ -338,3 +338,6 @@ A separate development-only deployment configuration has been committed:
 - [CLOUDFLARE_CONTAINER_DEPLOYMENT.md](CLOUDFLARE_CONTAINER_DEPLOYMENT.md) for Agent Lee's Cloudflare account eligibility, secret configuration, authenticated service binding and acceptance checklist.
 
 **No Cloudflare Container has been deployed or paid plan activated through this source preparation.** The existing `cnte-vsl-proxy` Worker, `cnte.ciu.edu.lr` DNS and Emergent production application were not modified. Do not expose the backend directly or insert bridge secrets into code. The authorized dev preview domain `labs-dev.ciu.edu.lr` remains pending real entitlement, Docker runtime and WebSocket acceptance tests.
+
+
+<!-- Cloudflare Workers Builds: development-branch deployment verification trigger 2026-11-11; no application behavior changed. -->
