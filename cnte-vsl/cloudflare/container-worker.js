@@ -8,9 +8,6 @@ import { adoptImageWhenIdle } from "./image-rollover.js";
 const PORT = 8080;
 const ROOM_CONTAINER_ID = "cnte-vsl-dev-single-instance";
 const INACTIVITY_MS = 4 * 60 * 60 * 1000;
-// One-time development maintenance: owner approved clearing up to one room
-// on this exact stale image. Remove after the replacement is verified.
-const APPROVED_RETIREMENT_IMAGE = "registry.cloudflare.com/692fcebd4970c8a08c949fc22c5aaa9c/cnte-vsl-container-dev-vslcontainer-base@sha256:5bc484639503d29373ec9104ab6f06a5e23051ddcbd0d4787f65b28b4484cb0a";
 
 function authorize(request, env) {
   const key = env.CNTE_VSL_BRIDGE_KEY;
@@ -37,7 +34,7 @@ export class VslContainer extends DurableObject {
   }
   async startAndWait() {
     const container = this.ctx.container;
-    await adoptImageWhenIdle(container, PORT, 2500, APPROVED_RETIREMENT_IMAGE);
+    await adoptImageWhenIdle(container, PORT);
     if (!container.running) {
       container.start({
         image: container.images.base,
