@@ -23,8 +23,10 @@ export function analyzeCircuit({volts=6,r1=100,r2=200,topology='series',fault='n
  return {status:'measured',reason:'Ideal DC measurement',resistance,current:expectedCurrent,voltage:volts,branchCurrents:[i1,i2],watts:volts*expectedCurrent,wiringCorrect:true,overcurrent:false,canMeasure:true};
 }
 export function gradePhysicsPractical({ppe=false,prepared=false,isolatedDuringWiring=false,correctMeters=false,measurements=[],notes='',unsafeAction=false}={}){
- const different=new Set(measurements.filter(x=>x.status==='measured').map(x=>x.topology)).size;
- const parts={safety:ppe?15:0,preparation:prepared?10:0,isolation:isolatedDuringWiring?15:0,connections:correctMeters?20:0,measurement:measurements.some(x=>x.status==='measured')?15:0,comparison:measurements.length>=2?15:0,interpretation:notes.trim().length>=30?10:0};
+ const different=new Set(measurements.filter(x=>x.status==='measured'&&['series','parallel'].includes(x.topology)).map(x=>x.topology)).size;
+ const reportComplete=notes.trim().length>=30;
+ const parts={safety:ppe?15:0,preparation:prepared?10:0,isolation:isolatedDuringWiring?15:0,connections:correctMeters?20:0,measurement:different>0?15:0,comparison:different===2?15:0,interpretation:reportComplete?10:0};
  const score=unsafeAction?0:Object.values(parts).reduce((a,b)=>a+b,0);
- return {score,passed:!unsafeAction&&score>=70&&different>=2,parts,topologiesMeasured:different,simulationOnly:true,unsafeAction};
+ const passed=!unsafeAction&&ppe&&prepared&&isolatedDuringWiring&&different===2&&score>=70;
+ return {score,passed,parts,topologiesMeasured:different,simulationOnly:true,unsafeAction,safetyFail:unsafeAction};
 }
