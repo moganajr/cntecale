@@ -19,4 +19,7 @@ for(const [options,result,expected] of [
   [{inspectFails:true},'deferred',[0,0]],
   [{rooms:0},'restarted',[1,1]]
 ]) {const f=fake(options);assert.equal(await adoptImageWhenIdle(f.container,8080),result);assert.deepEqual(f.counts(),expected);}
-console.log('14 development container image-rollover assertions passed.');
+const approved=fake({rooms:1});assert.equal(await adoptImageWhenIdle(approved.container,8080,2500,'old'),'restarted');assert.deepEqual(approved.counts(),[1,1]);
+const other=fake({rooms:1});assert.equal(await adoptImageWhenIdle(other.container,8080,2500,'different'),'deferred');assert.deepEqual(other.counts(),[0,1]);
+const more=fake({rooms:2});assert.equal(await adoptImageWhenIdle(more.container,8080,2500,'old'),'deferred');assert.deepEqual(more.counts(),[0,1]);
+console.log('20 development container image-rollover assertions passed.');
