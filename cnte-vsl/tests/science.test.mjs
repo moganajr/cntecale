@@ -4,6 +4,13 @@ import {QC_LEVELS,TRAINING_SAMPLES,assessControl,qualityGate,calculateIndices,an
 import {SPECIMENS,totalMagnification,fieldDiameterUm,focusQuality,estimateCellsInField,assessMicroscopyObservation,gradeMicroscopyPractical} from '../src/biologyMicroscopy.js';
 import {equivalentResistance,analyzeCircuit,gradePhysicsPractical} from '../src/physicsCircuit.js';
 import {physicsGuidance,summarizePhysicsReports} from '../src/physicsLearning.js';
+import {chemistryGuidance} from '../src/immersiveChemistry.js';
+const chemistryState={ppe:false,prepared:false,calibrated:false,indicator:false,params:{acidVol:25,baseMolarity:.1,volume:0},trials:[]};
+assert.match(chemistryGuidance(chemistryState),/safety/);
+Object.assign(chemistryState,{ppe:true,prepared:true});assert.match(chemistryGuidance(chemistryState),/calibration/);
+chemistryState.calibrated=true;assert.match(chemistryGuidance(chemistryState),/indicator/);
+chemistryState.indicator=true;chemistryState.params.volume=26;assert.match(chemistryGuidance(chemistryState),/overshot/);
+chemistryState.params.volume=25;assert.match(chemistryGuidance(chemistryState),/meniscus/);
 import {meniscusReading,titreFromReadings,summarizeTitres,titrationPracticalGrade,titrationCurve} from '../src/titrationPractical.js';
 import {LABS,titration,ohmsLaw,osmosis,hemoglobinQc,electrical,scoreAttempt,equivalenceVolumeMl,strongAcidBasePH} from '../src/science.js';
 assert.equal(LABS.length,7);
