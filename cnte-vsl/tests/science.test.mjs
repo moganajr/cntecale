@@ -5,6 +5,16 @@ import {SPECIMENS,totalMagnification,fieldDiameterUm,focusQuality,estimateCellsI
 import {equivalentResistance,analyzeCircuit,gradePhysicsPractical} from '../src/physicsCircuit.js';
 import {physicsGuidance,summarizePhysicsReports} from '../src/physicsLearning.js';
 import {chemistryGuidance} from '../src/immersiveChemistry.js';
+import {newRoom,roomAction,advanceLiquid,roomProgress} from '../src/roomState.js';
+const room=newRoom();
+assert.match(roomAction(room,'water'),/Collect/);
+assert.equal(roomAction(room,'cylinder'),'Apparatus collected.');
+assert.match(roomAction(room,'beaker'),/Place/);
+roomAction(room,'bench');roomAction(room,'beaker');assert.equal(roomAction(room,'water'),'fill');
+advanceLiquid(room,'fill',1);advanceLiquid(room,'fill',1);assert.equal(room.beakerMl,50);
+assert.equal(roomAction(room,'pour'),'pour');advanceLiquid(room,'pour',1);advanceLiquid(room,'pour',1);assert.equal(room.cylinderMl,50);assert.equal(room.beakerMl,0);
+roomAction(room,'mark:40');roomAction(room,'notebook');assert.equal(room.records[0].correct,false);
+roomAction(room,'mark:50');roomAction(room,'notebook');assert.equal(room.records[1].correct,true);assert.ok(roomProgress(room).every(Boolean));
 const chemistryState={ppe:false,prepared:false,calibrated:false,indicator:false,params:{acidVol:25,baseMolarity:.1,volume:0},trials:[]};
 assert.match(chemistryGuidance(chemistryState),/safety/);
 Object.assign(chemistryState,{ppe:true,prepared:true});assert.match(chemistryGuidance(chemistryState),/calibration/);

@@ -1,0 +1,70 @@
+import * as T from '../node_modules/three/build/three.module.js';
+import {newRoom,roomAction,advanceLiquid,roomProgress,roomGuidance} from './roomState.js';
+const $=id=>document.getElementById(id);
+const stage=$('stage'),s=newRoom();
+let renderer;
+try{renderer=new T.WebGLRenderer({antialias:true})}catch{stage.textContent='This interactive room requires WebGL. Return to the accessible laboratory workbenches.';throw Error('WebGL unavailable')}
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.6));renderer.shadowMap.enabled=true;renderer.shadowMap.type=T.PCFSoftShadowMap;renderer.outputColorSpace=T.SRGBColorSpace;
+stage.replaceChildren(renderer.domElement);const canvas=renderer.domElement;canvas.setAttribute('aria-label','Interactive 3D laboratory room. Click floor, apparatus and scale markings.');
+const scene=new T.Scene();scene.background=new T.Color('#d3e4ec');scene.fog=new T.Fog('#d3e4ec',25,45);
+const camera=new T.PerspectiveCamera(42,1,.1,70),target=new T.Vector3(0,1,0);let yaw=.22,radius=17,closeView=false;
+const mat=(c,o={})=>new T.MeshStandardMaterial({color:c,roughness:.65,...o});
+const cream=mat('#e0edf0'),floorM=mat('#c1d0d6'),wood=mat('#b8a68d'),steel=mat('#617989',{metalness:.45}),dark=mat('#243e51'),teal=mat('#087f80'),white=mat('#f2f4ee'),glass=mat('#bce4ea',{transparent:true,opacity:.27,depthWrite:false,side:T.DoubleSide}),blue=mat('#30a9c9',{transparent:true,opacity:.65,depthWrite:false}),skin=mat('#ba845e'),pants=mat('#243b50'),coat=mat('#f4f5ed');
+const pick=[];
+const mesh=(p,g,m,x,y,z)=>{const o=new T.Mesh(g,m);o.position.set(x,y,z);o.castShadow=!m.transparent;o.receiveShadow=true;p.add(o);return o};
+const box=(p,w,h,d,m,x,y,z)=>mesh(p,new T.BoxGeometry(w,h,d),m,x,y,z);
+const cyl=(p,a,b,h,m,x,y,z,open=false)=>mesh(p,new T.CylinderGeometry(a,b,h,32,1,open),m,x,y,z);
+const sphere=(p,r,m,x,y,z)=>mesh(p,new T.SphereGeometry(r,24,16),m,x,y,z);
+const group=(id,x,y,z)=>{const g=new T.Group();g.position.set(x,y,z);if(id){g.userData.action=id;pick.push(g)}scene.add(g);return g};
+function label(parent,text,x,y,z,w=2.7,h=.42){const c=document.createElement('canvas');c.width=512;c.height=96;const ctx=c.getContext('2d');ctx.fillStyle='#173c52';ctx.roundRect(0,0,512,96,12);ctx.fill();ctx.fillStyle='white';ctx.font=/^\d+$/.test(text)?'bold 76px system-ui':'bold 35px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(text,256,48);const texture=new T.CanvasTexture(c);texture.colorSpace=T.SRGBColorSpace;const m=new T.MeshBasicMaterial({map:texture,transparent:true});const o=mesh(parent,new T.PlaneGeometry(w,h),m,x,y,z);return o}
+const floor=box(scene,13,.18,10,floorM,0,-.1,0);floor.userData.floor=true;
+for(let x=-6;x<=6;x++)box(scene,.016,.004,10,cream,x,.007,0);
+for(let z=-5;z<=5;z++)box(scene,13,.004,.016,cream,0,.007,z);
+box(scene,13,4.6,.18,cream,0,2.3,-5);box(scene,.18,4.6,10,cream,-6.5,2.3,0);
+box(scene,5.5,2.3,.12,dark,.5,2.85,-4.88);box(scene,5.25,2.08,.12,mat('#9fc7db'),.5,2.85,-4.79);
+for(let x of [-.8,1.8])box(scene,.09,2.15,.15,white,x,2.85,-4.7);
+box(scene,5.3,.075,.15,white,.5,2.85,-4.7);
+label(scene,'CNTE · SCIENCE LABORATORY',0,4.25,-4.86,5.7,.52);
+const storage=group(null,-4,0,-3.65);box(storage,3,.1,1.15,wood,0,1.1,0);box(storage,3,.1,1.15,wood,0,1.95,0);box(storage,3,.1,1.15,wood,0,2.8,0);
+for(let x of [-1.48,1.48])box(storage,.12,3,1.15,steel,x,1.5,0);
+box(storage,3,.68,1.12,dark,0,.4,0);label(storage,'APPARATUS STORE',0,3.1,.62,2.9,.4);
+const water=group('water',4,0,-3.65);box(water,2.9,1.05,1.45,dark,0,.525,0);box(water,3,.12,1.55,steel,0,1.1,0);box(water,1.2,.08,.8,mat('#a5b8bf'),0,1.18,.2);cyl(water,.055,.055,.55,steel,0,1.43,-.17);box(water,.11,.1,.55,steel,0,1.69,.06);cyl(water,.055,.055,.18,steel,0,1.61,.3);label(water,'WATER STATION',0,2.05,.2,2.7,.4);
+const bench=group('bench',0,0,-.8);box(bench,3.8,.17,1.8,wood,0,1.0,0);for(const x of [-1.7,1.7])for(const z of [-.7,.7])box(bench,.14,.95,.14,steel,x,.48,z);label(bench,'WORKBENCH',0,.78,.93,2.1,.35);
+const notebook=group('notebook',1.08,1.12,-.2);box(notebook,.7,.08,.5,teal,0,0,0);box(notebook,.62,.025,.43,white,0,.052,0);for(let z=-.14;z<.18;z+=.055)box(notebook,.48,.004,.012,steel,0,.071,z);label(notebook,'RECORD',0,.22,.24,.8,.22);
+const beaker=group('beaker',-4.65,1.15,-3.35);cyl(beaker,.26,.23,.48,glass,0,.24,0,true);cyl(beaker,.23,.23,.025,glass,0,.013,0);const beakerWater=cyl(beaker,.225,.225,.42,blue,0,.21,0);
+const cylinder=group('cylinder',-3.45,1.15,-3.35);cyl(cylinder,.25,.25,.07,teal,0,.035,0);cyl(cylinder,.115,.115,.9,glass,0,.5,0,true);cyl(cylinder,.115,.115,.035,glass,0,.07,0);const cylinderWater=cyl(cylinder,.098,.098,.85,blue,0,.5,0);
+for(let n=0;n<=100;n+=10){const y=.09+n*.0085;const mark=group(null,0,0,0);scene.remove(mark);cylinder.add(mark);mark.userData.action='mark:'+n;box(mark,.15,.014,.019,dark,.035,y,.117);const hit=box(mark,.23,.065,.025,new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}),.07,y,.13);hit.userData.action='mark:'+n;if(n%20===0){const l=label(mark,String(n),.23,y,.13,.2,.075);l.userData.action='mark:'+n}}
+label(beaker,'BEAKER',0,.63,0,1.1,.26);label(cylinder,'CYLINDER',0,1.14,0,1.3,.26);
+const avatar=group(null,0,0,3.7);const torso=box(avatar,.48,.65,.3,coat,0,1.13,0);box(avatar,.08,.5,.02,teal,0,1.12,.16);sphere(avatar,.23,skin,0,1.68,0);sphere(avatar,.235,dark,0,1.78,-.035);box(avatar,.39,.11,.06,mat('#77b8d2'),0,1.71,.195);
+const legs=[],arms=[];for(let x of [-.14,.14]){const pivot=new T.Group();avatar.add(pivot);pivot.position.set(x,.81,0);box(pivot,.19,.63,.2,pants,0,-.25,0);box(pivot,.21,.14,.34,dark,0,-.66,.05);legs.push(pivot)}
+for(let x of [-.35,.35]){const a=new T.Group();avatar.add(a);a.position.set(x,1.39,0);box(a,.18,.43,.19,coat,0,-.19,0);sphere(a,.11,skin,0,-.45,0);arms.push(a)}
+const hand=new T.Group();avatar.add(hand);hand.position.set(.4,.94,.33);const stream=cyl(scene,.027,.027,1,blue,0,0,0);stream.visible=false;
+const sight=new T.RingGeometry(.12,.22,32),marker=mesh(scene,sight,new T.MeshBasicMaterial({color:'#1ab5a4',side:T.DoubleSide}),0,.023,0);marker.rotation.x=-Math.PI/2;marker.visible=false;
+scene.add(new T.HemisphereLight('#e3f5ff','#8f9aa1',2.1));const light=new T.DirectionalLight('#fff6e8',3.1);light.position.set(3,9,5);light.castShadow=true;light.shadow.mapSize.set(2048,2048);Object.assign(light.shadow.camera,{left:-9,right:9,top:8,bottom:-8});scene.add(light);
+const stations={beaker:[-4.65,-2.4],cylinder:[-3.45,-2.4],water:[4,-2.4],bench:[0,.45],pour:[0,.45],notebook:[1.15,.45]};
+let route=[],pending=null,transfer=null,phase=0,walking=false,lastMessage='';
+function refresh(message=''){lastMessage=message||lastMessage;$('held').textContent=s.held?'Holding '+s.held:'Hands empty';$('coach').textContent=message||roomGuidance(s);const names=['Locate the cylinder','Place it on the workbench','Collect and fill the beaker','Transfer liquid into cylinder','Record an accurate observation'];$('steps').replaceChildren(...roomProgress(s).map((done,i)=>{const li=document.createElement('li');li.textContent=names[i];if(done)li.className='done';return li}));$('notebook').replaceChildren(...(s.records.length?s.records.map(r=>{const p=document.createElement('div');p.textContent=r.observed+' mL · '+(r.correct?'Within tolerance':'Review reading');return p}):[document.createTextNode('No observations recorded.')]))}
+function placeObjects(){for(const [id,obj] of [['beaker',beaker],['cylinder',cylinder]]){if(s[id]==='held'){if(obj.parent!==hand)hand.add(obj);obj.position.set(0,.02,0)}else{if(obj.parent!==scene)scene.add(obj);obj.position.set(...(s[id]==='storage'?(id==='beaker'?[-4.65,1.15,-3.35]:[-3.45,1.15,-3.35]):(id==='beaker'?[-.95,1.09,-.4]:[.05,1.09,-.4])));obj.rotation.set(0,0,0)}}
+ updateLiquids()}
+function updateLiquids(){const update=(o,ml,height,base)=>{const fraction=ml/100;o.visible=ml>.001;o.scale.y=Math.max(.001,fraction);o.position.y=base+height*fraction/2};update(beakerWater,s.beakerMl,.42,.025);update(cylinderWater,s.cylinderMl,.85,.09)}
+function walk(x,z,action=null){if(transfer){stopTransfer();return}x=T.MathUtils.clamp(x,-5.8,5.8);z=T.MathUtils.clamp(z,-2.5,4.6);
+ // Approach stations through the clear front aisle. Avoid crossing the central bench.
+ const insideBench=Math.abs(x)<2.15&&z<.45;if(insideBench)z=.45;
+ route=[];const a=avatar.position;if(Math.abs(a.x-x)>.5&&(a.z<.45||z<.45)){route.push(new T.Vector3(a.x,0,1.15),new T.Vector3(x,0,1.15))}
+ route.push(new T.Vector3(x,0,z));pending=action;marker.position.set(x,.023,z);marker.visible=true;$('location').textContent='Walking…';}
+function invoke(id){if(transfer){stopTransfer();return}if(id.startsWith('mark:')&&(s.cylinder!=='bench'||(!closeView&&s.held==='beaker'&&s.beakerMl>0)))id='cylinder';if(id==='cylinder'&&s.cylinder==='bench'&&s.cylinderMl>0&&s.beakerMl===0){closeView=true;refresh('Inspect the cylinder scale. Click the nearest marked graduation.');return;}if(id==='cylinder'&&s.held==='beaker'&&s.cylinder==='bench')id='pour';let dest=stations[id];if(id.startsWith('mark:'))dest=[.05,.45];if(id==='beaker'&&s.beaker==='bench')dest=[-.95,.45];if(id==='cylinder'&&s.cylinder==='bench')dest=[.05,.45];if(!dest)return;walk(...dest,id)}
+function arrived(id){$('location').textContent=id==='water'?'Water station':id==='beaker'||id==='cylinder'?(s[id]==='storage'?'Apparatus store':'Workbench'):'Workbench';const result=roomAction(s,id);placeObjects();if(result==='fill'||result==='pour'){transfer=result;phase=0;refresh(result==='fill'?'Filling the beaker. Click anywhere to stop.':'Pouring into the cylinder. Click anywhere to stop.')}else {if(id.startsWith('mark:')&&s.reading!==null)closeView=false;refresh(result)}}
+function stopTransfer(){if(!transfer)return;const mode=transfer;transfer=null;if(mode==='pour'&&s.cylinderMl>0)closeView=true;stream.visible=false;beaker.rotation.set(0,0,0);placeObjects();refresh(roomGuidance(s))}
+function animateTransfer(dt){if(!transfer)return;phase+=dt;const filling=transfer==='fill';if(filling){beaker.position.set(-.4,.07,.62);beaker.rotation.z=0}else{beaker.rotation.z=-.95*Math.min(1,phase*3);beaker.position.set(-.4,1.05,.52)}
+ const from=filling?new T.Vector3(4,1.52,-3.35):beaker.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,.2,0)),to=filling?beaker.getWorldPosition(new T.Vector3()).add(new T.Vector3(0,.3,0)):new T.Vector3(.05,2.04,-.4);const direction=to.clone().sub(from);stream.visible=true;stream.position.copy(from).addScaledVector(direction,.5);stream.scale.y=Math.max(.01,direction.length());stream.quaternion.setFromUnitVectors(new T.Vector3(0,1,0),direction.normalize());const more=advanceLiquid(s,transfer,dt);updateLiquids();if(!more)stopTransfer()}
+const ray=new T.Raycaster(),mouse=new T.Vector2();canvas.addEventListener('click',e=>{if(transfer){stopTransfer();return}const rect=canvas.getBoundingClientRect();mouse.set((e.clientX-rect.left)/rect.width*2-1,1-(e.clientY-rect.top)/rect.height*2);ray.setFromCamera(mouse,camera);const hits=ray.intersectObjects([...pick,floor],true);for(const hit of hits){let o=hit.object;while(o&&!o.userData.action&&!o.userData.floor)o=o.parent;if(!o)continue;if(o.userData.action){invoke(o.userData.action);return}if(o.userData.floor){walk(hit.point.x,hit.point.z);return}}});
+const access=$('access');for(const [id,name] of [['cylinder','Collect cylinder'],['bench','Place on bench'],['beaker','Collect beaker'],['water','Fill water'],['pour','Pour into cylinder'],['notebook','Record notebook'],...Array.from({length:11},(_,i)=>['mark:'+(i*10),'Read '+i*10+' mL'])]){const b=document.createElement('button');b.textContent=name;b.onclick=()=>invoke(id);access.append(b)}
+$('overview').onclick=()=>{closeView=false;yaw=.22;radius=17};$('inspect').onclick=()=>{if(s.cylinder==='bench'){closeView=true;refresh('Inspect the cylinder scale and select a graduation.')}else refresh('Place the cylinder on the bench before inspecting its scale.');};$('rotateLeft').onclick=()=>yaw-=.22;$('rotateRight').onclick=()=>yaw+=.22;$('zoomIn').onclick=()=>radius=Math.max(9,radius-1.4);$('zoomOut').onclick=()=>radius=Math.min(22,radius+1.4);
+$('exportNotebook').onclick=()=>{if(!s.records.length){refresh('Record an observation before exporting.');return}const url=URL.createObjectURL(new Blob([JSON.stringify({lab:'water-measurement',simulationOnly:true,records:s.records},null,2)],{type:'application/json'}));const a=document.createElement('a');a.href=url;a.download='cnte-water-measurements.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)};$('reset').onclick=()=>{if(confirm('Restart this practical?'))location.reload()};
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix()}new ResizeObserver(resize).observe(stage);resize();refresh();placeObjects();
+let previous=performance.now(),time=0;
+function frame(now){const dt=Math.min(.06,(now-previous)/1000);previous=now;time+=dt;walking=route.length>0;
+ if(walking){const goal=route[0],delta=goal.clone().sub(avatar.position),dist=delta.length();if(dist<.06){avatar.position.copy(goal);route.shift();if(!route.length){marker.visible=false;const action=pending;pending=null;if(action){const face=action==='water'?new T.Vector3(4,0,-3.5):(action==='beaker'||action==='cylinder')&&s[action]==='storage'?new T.Vector3(goal.x,0,-3.5):new T.Vector3(goal.x,0,-.5);if(face.distanceTo(avatar.position)>.1)avatar.rotation.y=Math.atan2(face.x-avatar.position.x,face.z-avatar.position.z);arrived(action)}else $('location').textContent='Laboratory aisle'}}else{avatar.rotation.y=Math.atan2(delta.x,delta.z);avatar.position.addScaledVector(delta.normalize(),Math.min(dist,dt*3.3))}}
+ legs.forEach((l,i)=>l.rotation.x=walking?Math.sin(time*10+i*Math.PI)*.45:0);arms.forEach((a,i)=>a.rotation.x=s.held&&i===1?-.85:walking?Math.sin(time*10+i*Math.PI)*-.3:0);if(transfer)animateTransfer(dt);
+ if(closeView){camera.position.set(1.5,2.35,2.35);camera.lookAt(.05,1.62,-.4)}else{camera.position.set(Math.sin(yaw)*radius,radius*.76,Math.cos(yaw)*radius);camera.lookAt(target);}renderer.render(scene,camera);requestAnimationFrame(frame)}
+requestAnimationFrame(frame);
