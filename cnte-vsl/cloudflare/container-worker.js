@@ -3,6 +3,7 @@
  * Set CNTE_VSL_BRIDGE_KEY as a secret on BOTH Workers (same random 32+ bytes).
  */
 import { DurableObject } from "cloudflare:workers";
+import { adoptImageWhenIdle } from "./image-rollover.js";
 
 const PORT = 8080;
 const ROOM_CONTAINER_ID = "cnte-vsl-dev-single-instance";
@@ -33,6 +34,7 @@ export class VslContainer extends DurableObject {
   }
   async startAndWait() {
     const container = this.ctx.container;
+    await adoptImageWhenIdle(container, PORT);
     if (!container.running) {
       container.start({
         image: container.images.base,
