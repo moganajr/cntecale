@@ -5,7 +5,8 @@ import {SPECIMENS,totalMagnification,fieldDiameterUm,focusQuality,estimateCellsI
 import {equivalentResistance,analyzeCircuit,gradePhysicsPractical} from '../src/physicsCircuit.js';
 import {physicsGuidance,summarizePhysicsReports} from '../src/physicsLearning.js';
 import {chemistryGuidance} from '../src/immersiveChemistry.js';
-import {newRoom,roomAction,advanceLiquid,roomProgress} from '../src/roomState.js';
+import {newRoom,roomAction,advanceLiquid,roomProgress,roomCleaned,roomAssessment} from '../src/roomState.js';
+import {planRoomRoute,clearSegment,ROOM_OBSTACLES} from '../src/roomNavigation.js';
 const room=newRoom();
 assert.match(roomAction(room,'water'),/Collect/);
 assert.equal(roomAction(room,'cylinder'),'Apparatus collected.');
@@ -15,6 +16,11 @@ advanceLiquid(room,'fill',1);advanceLiquid(room,'fill',1);assert.equal(room.beak
 assert.equal(roomAction(room,'pour'),'pour');advanceLiquid(room,'pour',1);advanceLiquid(room,'pour',1);assert.equal(room.cylinderMl,50);assert.equal(room.beakerMl,0);
 roomAction(room,'mark:40');roomAction(room,'notebook');assert.equal(room.records[0].correct,false);
 roomAction(room,'mark:50');roomAction(room,'notebook');assert.equal(room.records[1].correct,true);assert.ok(roomProgress(room).every(Boolean));
+assert.equal(room.records[1].targetMet,true);
+assert.equal(roomCleaned(room),false);roomAction(room,'storage');roomAction(room,'cylinder');assert.match(roomAction(room,'storage'),/Empty/);assert.equal(roomAction(room,'sink'),'drain');advanceLiquid(room,'drain',1);roomAction(room,'storage');assert.equal(roomCleaned(room),true);
+assert.equal(roomAssessment(room).score,100);assert.equal(roomAssessment(room).passed,true);
+const distantRoute=planRoomRoute([4,-2.4],[4,2.85]);assert.ok(distantRoute.length>1);assert.ok(distantRoute.every((p,i)=>clearSegment(i?distantRoute[i-1]:[4,-2.4],p,ROOM_OBSTACLES)));assert.deepEqual(distantRoute.at(-1),[4,2.85]);
+const benchRoute=planRoomRoute([-4,-2.4],[0,.45]);assert.ok(benchRoute.length>1);assert.ok(benchRoute.every((p,i)=>clearSegment(i?benchRoute[i-1]:[-4,-2.4],p)));
 const chemistryState={ppe:false,prepared:false,calibrated:false,indicator:false,params:{acidVol:25,baseMolarity:.1,volume:0},trials:[]};
 assert.match(chemistryGuidance(chemistryState),/safety/);
 Object.assign(chemistryState,{ppe:true,prepared:true});assert.match(chemistryGuidance(chemistryState),/calibration/);

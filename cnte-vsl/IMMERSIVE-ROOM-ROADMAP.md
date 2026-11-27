@@ -4,7 +4,7 @@ The room experience is intended to replace static instrument illustrations with 
 
 ## Current foundation
 
-`room.html` is a water-measurement training room. `src/room.js` owns rendering, walking, pointer targeting, camera views and transfer animation. `src/roomState.js` owns inventory, capacity, liquid conservation, scale observations and practice assessment. The simulation uses water and has no real chemicals or specimens. Existing discipline-specific laboratories remain available.
+`room.html` is a water-measurement training room. `src/room.js` owns rendering, pointer targeting, camera views and transfer animation. `src/roomNavigation.js` provides obstacle-aware route planning, and `src/roomAvatar.js` provides articulated movement and hand attachment. `src/roomState.js` owns inventory, capacity, liquid conservation, scale observations, assigned volume, cleaning and practice assessment. Learners can export a timestamped action log and save a report to their browser-local portfolio; faculty review surfaces local rubric gaps. The simulation uses water and has no real chemicals or specimens. Existing discipline-specific laboratories remain available.
 
 The pilot supports one local operator. It is not a synchronized classroom, a calibrated instrument, a fluid-dynamics solver or a certified competency assessment. Its current avatar and scenery are procedural placeholders for professionally authored assets.
 
