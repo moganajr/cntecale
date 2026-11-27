@@ -1,4 +1,5 @@
 import {analyzeCircuit,gradePhysicsPractical} from './physicsCircuit.js';
+import {physicsGuidance} from './physicsLearning.js';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=(x,n=3)=>Number(x).toFixed(n);
 export function initialPhysics(){return {volts:6,r1:100,r2:200,topology:'series',fault:'none',switchClosed:false,ammeter:'absent',voltmeter:'absent',isolated:true,limitAmps:.5,isolatedDuringWiring:false,unsafeAction:false,measurements:[]}}
@@ -12,6 +13,7 @@ function assessmentStatus(grade){
 }
 export function physicsView(s){
  const p=s.physics,res=analyzeCircuit(p);const measured=p.measurements||[];
+ const guidance=physicsGuidance(s,res);
  const grade=physicsGrade(s);
  const stages=[['Safety',s.ppe&&s.prepared],['Assembly',p.isolatedDuringWiring&&p.ammeter==='series'&&p.voltmeter==='parallel'],['Measurements',grade.topologiesMeasured===2],['Analysis',(s.notes||'').trim().length>=30]];
  const wires=p.topology==='series'
@@ -22,7 +24,7 @@ export function physicsView(s){
  <nav class="workspace-nav" aria-label="Practical workspace"><a href="#physics-bench">Workbench</a><a href="#physics-procedure">Procedure</a><a href="#physics-results">Measurements & report</a><a href="#physics-assessment">Assessment</a></nav>
  <ol class="practical-progress" aria-label="Practical progress">${stages.map(([title,done])=>`<li data-stage="${esc(title)}" class="${done?'complete':''}">${esc(title)}<span>${done?'Complete':'In progress'}</span></li>`).join('')}</ol>
  <div class="split physics-workspace"><div>
- <section class="panel" id="physics-bench"><h2>Workbench</h2><h3>Rotatable 3D circuit workbench</h3><div class="apparatus" id="physics-3d"></div><p class="muted">Drag to rotate and scroll to zoom. The schematic and controls below define the actual simulated circuit.</p></section><section class="panel"><h3>Interactive circuit schematic</h3>
+ <section class="panel" id="physics-bench"><h2>Workbench</h2><div class="learning-coach" role="status"><span class="eyebrow">Practical guidance</span><h3>${esc(guidance.title)}</h3><p>${esc(guidance.detail)}</p></div><h3>Interactive 3D circuit workbench</h3><div class="apparatus" id="physics-3d"></div><p class="muted">Select equipment in the scene or use the instrument buttons. Rotate and zoom to inspect the workspace. The schematic and form are available for precise adjustments.</p></section><section class="panel"><h3>Interactive circuit schematic</h3>
  <div class="apparatus"><svg viewBox="0 0 580 300" role="img" aria-label="Circuit with DC supply, two resistors, current meter and voltmeter; wire connections depend on topology" style="max-height:330px">
  <rect x="5" y="5" width="570" height="290" rx="12" fill="#eaf5f7"/>
  <g stroke="${res.status==='measured'?'#189786':'#648594'}" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round">${wires}</g>

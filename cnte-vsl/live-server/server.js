@@ -34,7 +34,8 @@ const server=http.createServer(async(req,res)=>{const pathname=new URL(req.url,'
  if(req.method!=='GET'&&req.method!=='HEAD')return reply(res,405,{error:'Unsupported request'});
  const route=pathname==='/'?'/index.html':pathname;
  const full=path.resolve(root,'.'+route);
- if(!full.startsWith(root+path.sep)||/^\/(?:live-server|tests|node_modules|\.github)(?:\/|$)/.test(route))return reply(res,403,{error:'Forbidden'});
+ const viewerModule=route==='/node_modules/three/build/three.module.js'||route==='/node_modules/three/build/three.core.js';
+ if(!full.startsWith(root+path.sep)||(!viewerModule&&/^\/(?:live-server|tests|node_modules|\.github)(?:\/|$)/.test(route)))return reply(res,403,{error:'Forbidden'});
  try{if(!existsSync(full)||!statSync(full).isFile())return reply(res,404,{error:'Not found'});res.writeHead(200,{'Content-Type':mime[path.extname(full)]||'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':'no-cache'});createReadStream(full).pipe(res)}catch{return reply(res,404,{error:'Not found'})}
 });
 const wss=new WebSocketServer({server,maxPayload:8192,path:'/live'});

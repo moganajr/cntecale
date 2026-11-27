@@ -7,3 +7,17 @@
 .physics-workspace h2{font-size:20px;margin:0 0 16px}.physics-workspace section{scroll-margin-top:20px}.assessment-rubric{margin:16px 0}.assessment-rubric div{display:flex;justify-content:space-between;border-bottom:1px solid #e2edf1;padding:9px 0;font-size:13px}.assessment-rubric dt{text-transform:capitalize}.assessment-rubric dd{margin:0;color:#34556a}
 :focus-visible{outline:3px solid #137dba;outline-offset:3px}
 @media(max-width:700px){.topbar{flex-direction:column}.topright{max-width:100%;justify-content:flex-start}.practical-progress{grid-template-columns:repeat(2,minmax(0,1fr))}.workspace-nav a{flex:1;text-align:center}}
+/* Interactive physics laboratory */
+.immersive-lab{width:100%;min-width:0;display:grid;gap:10px}
+.immersive-stage{height:clamp(320px,46vw,500px);background:#cbdbe6;border-radius:12px;overflow:hidden;position:relative}
+.immersive-tools,.immersive-equipment{display:flex;flex-wrap:wrap;gap:7px}
+.immersive-tools button,.immersive-equipment button{padding:8px 10px;font-size:12px}
+.immersive-equipment button[aria-pressed="true"]{background:#d9eee8;border-color:#15978b;color:#155d49}
+.immersive-controls{padding:14px;border:1px solid #cbdde5;border-radius:10px;background:#fff}
+.immersive-controls h3{margin:0 0 10px}
+.immersive-controls p{margin:10px 0 0}
+.learning-coach{padding:16px;margin:0 0 16px;background:#e6f5f1;border:1px solid #c6e6dc;border-radius:12px}
+.learning-coach h3{margin:6px 0 5px}
+.learning-coach p{margin:0;line-height:1.5;font-size:14px}
+@media(min-width:1101px){.physics-workspace:has(.immersive-lab)>div{display:contents}.physics-workspace:has(.immersive-lab){grid-template-columns:repeat(2,minmax(0,1fr))}.physics-workspace:has(.immersive-lab) #physics-bench{grid-column:1/-1}}
+@media(max-width:700px){.immersive-stage{height:330px}.immersive-controls .toolbar button{flex:1 1 42%}}
