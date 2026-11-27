@@ -2,9 +2,13 @@ import {analyzeCircuit,gradePhysicsPractical} from './physicsCircuit.js';
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=(x,n=3)=>Number(x).toFixed(n);
 export function initialPhysics(){return {volts:6,r1:100,r2:200,topology:'series',fault:'none',switchClosed:false,ammeter:'absent',voltmeter:'absent',isolated:true,limitAmps:.5,isolatedDuringWiring:false,unsafeAction:false,measurements:[]}}
+function physicsGrade(s){
+ const p=s.physics;
+ return gradePhysicsPractical({ppe:s.ppe,prepared:s.prepared,isolatedDuringWiring:p.isolatedDuringWiring,correctMeters:p.ammeter==='series'&&p.voltmeter==='parallel',measurements:p.measurements||[],notes:s.notes||'',unsafeAction:p.unsafeAction});
+}
 export function physicsView(s){
  const p=s.physics,res=analyzeCircuit(p);const measured=p.measurements||[];
- const grade=gradePhysicsPractical({ppe:s.ppe,prepared:s.prepared,isolatedDuringWiring:p.isolatedDuringWiring,correctMeters:p.ammeter==='series'&&p.voltmeter==='parallel',measurements:measured,notes:s.notes||'',unsafeAction:p.unsafeAction});
+ const grade=physicsGrade(s);
  const stages=[['Safety',s.ppe&&s.prepared],['Assembly',p.isolatedDuringWiring&&p.ammeter==='series'&&p.voltmeter==='parallel'],['Measurements',new Set(measured.map(m=>m.topology)).size===2],['Analysis',(s.notes||'').trim().length>=30]];
  const wires=p.topology==='series'
  ?'<path d="M125 105 H205 M275 105 H335 M405 105 H480 V237 H125 V105" />'
@@ -12,7 +16,7 @@ export function physicsView(s){
  return `<div class="labbar"><button id="physics-back">← All laboratories</button><span class="pill">Physics practical · Guided workspace</span></div>
  <div class="pagehead"><span class="eyebrow">Physics / WASSCE · University · TVET</span><h1>DC Circuit Builder & Ohm's Law</h1><p class="muted">Assemble simulated series and parallel resistor circuits, place meters, check safety, run measurements and compare theoretical values. Ideal DC education model.</p></div>
  <nav class="workspace-nav" aria-label="Practical workspace"><a href="#physics-bench">Workbench</a><a href="#physics-procedure">Procedure</a><a href="#physics-results">Measurements & report</a><a href="#physics-assessment">Assessment</a></nav>
- <ol class="practical-progress" aria-label="Practical progress">${stages.map(([title,done])=>`<li class="${done?'complete':''}">${esc(title)}<span>${done?'Complete':'In progress'}</span></li>`).join('')}</ol>
+ <ol class="practical-progress" aria-label="Practical progress">${stages.map(([title,done])=>`<li data-stage="${esc(title)}" class="${done?'complete':''}">${esc(title)}<span>${done?'Complete':'In progress'}</span></li>`).join('')}</ol>
  <div class="split physics-workspace"><div>
  <section class="panel" id="physics-bench"><h2>Workbench</h2><h3>Rotatable 3D circuit workbench</h3><div class="apparatus" id="physics-3d"></div><p class="muted">Drag to rotate and scroll to zoom. The schematic and controls below define the actual simulated circuit.</p></section><section class="panel"><h3>Interactive circuit schematic</h3>
  <div class="apparatus"><svg viewBox="0 0 580 300" role="img" aria-label="Circuit with DC supply, two resistors, current meter and voltmeter; wire connections depend on topology" style="max-height:330px">
@@ -44,7 +48,7 @@ export function physicsView(s){
  </section>
  <section class="panel" id="physics-results"><h2>Measurements & report</h2><p class="muted">Record both circuit configurations, then explain your findings. Save your report to this browser and export it to share with your lecturer.</p>${measured.length?'<div class="tablewrap"><table class="records"><thead><tr><th>Network</th><th>Supply</th><th>Resistance</th><th>Current</th><th>Power</th></tr></thead><tbody>'+measured.map(m=>`<tr><td>${esc(m.topology)}</td><td>${fmt(m.volts,2)} V</td><td>${fmt(m.resistance,2)} Ω</td><td>${fmt(m.current*1000,2)} mA</td><td>${fmt(m.watts,3)} W</td></tr>`).join('')+'</tbody></table></div>':'<p class="muted">No successful measurements yet. Record both series and parallel circuits.</p>'}
  <div class="field"><label for="phy-notes">Compare predictions and measurements; explain meter connections</label><textarea id="phy-notes">${esc(s.notes||'')}</textarea></div><div class="toolbar" style="margin-top:13px"><button class="primary" id="phy-submit">Save physics practice report</button><button class="ghost" id="phy-export">Export session JSON</button></div></section>
- </div><div><section class="panel" id="physics-procedure"><h2>Procedure</h2><h3>Equipment inventory</h3><p class="muted">DC supply (0–24 V), two resistors, ammeter, voltmeter, connecting leads and supply switch. Current limit: ${fmt(p.limitAmps,2)} A.</p><h3>Guided practical procedure</h3><ol class="timeline"><li>Review electrical safety and instrument function</li><li>Isolate source, select components and assemble circuit</li><li>Install ammeter in series, voltmeter across load</li><li>Inspect fault state and current limit</li><li>Close switch and run simulated measurement</li><li>Record series and parallel data</li><li>Compare with Ohm's law and calculate power</li><li>Explain observations in your report</li></ol><div class="note"><b>Equations:</b> I = V/R, P = VI; series R = R1 + R2; parallel 1/R = 1/R1 + 1/R2.</div></section><section class="panel" id="physics-assessment"><h2>Assessment</h2><p class="muted">Current practice score <strong>${grade.score}%</strong>. ${grade.unsafeAction?'An unsafe measurement attempt requires a reset and a fresh attempt.':'Complete both topologies and explain your results.'}</p><dl class="assessment-rubric">${Object.entries(grade.parts).map(([name,points])=>`<div><dt>${esc(name)}</dt><dd>${points} points earned</dd></div>`).join('')}</dl><h3>Assessment objectives</h3><p class="muted">Safety (15), preparation (10), isolated wiring (15), meters (20), first measurement (15), comparisons (15), analysis (10). Both network topologies must be successfully measured for a practice pass.</p><span class="badge provisional">Scientific and curriculum review pending</span></section></div></div>`;
+ </div><div><section class="panel" id="physics-procedure"><h2>Procedure</h2><h3>Equipment inventory</h3><p class="muted">DC supply (0–24 V), two resistors, ammeter, voltmeter, connecting leads and supply switch. Current limit: ${fmt(p.limitAmps,2)} A.</p><h3>Guided practical procedure</h3><ol class="timeline"><li>Review electrical safety and instrument function</li><li>Isolate source, select components and assemble circuit</li><li>Install ammeter in series, voltmeter across load</li><li>Inspect fault state and current limit</li><li>Close switch and run simulated measurement</li><li>Record series and parallel data</li><li>Compare with Ohm's law and calculate power</li><li>Explain observations in your report</li></ol><div class="note"><b>Equations:</b> I = V/R, P = VI; series R = R1 + R2; parallel 1/R = 1/R1 + 1/R2.</div></section><section class="panel" id="physics-assessment"><h2>Assessment</h2><p class="muted">Current practice score <strong id="phy-score" aria-live="polite">${grade.score}%</strong>. ${grade.unsafeAction?'An unsafe measurement attempt requires a reset and a fresh attempt.':'Complete both topologies and explain your results.'}</p><dl class="assessment-rubric">${Object.entries(grade.parts).map(([name,points])=>`<div><dt>${esc(name)}</dt><dd data-rubric="${esc(name)}">${points} points earned</dd></div>`).join('')}</dl><h3>Assessment objectives</h3><p class="muted">Safety (15), preparation (10), isolated wiring (15), meters (20), first measurement (15), comparisons (15), analysis (10). Both network topologies must be successfully measured for a practice pass.</p><span class="badge provisional">Scientific and curriculum review pending</span></section></div></div>`;
 }
 export function wirePhysics(s,{refresh,back,submit,download}){
  const p=s.physics;
@@ -72,7 +76,16 @@ export function wirePhysics(s,{refresh,back,submit,download}){
    s.readings.push({time:new Date().toLocaleTimeString(),label:'Physics '+p.topology,value:s.outcome.detail});
    refresh();
  };
- document.getElementById('phy-notes').oninput=e=>{s.notes=e.target.value};
+ document.getElementById('phy-notes').oninput=e=>{
+   s.notes=e.target.value;
+   const grade=physicsGrade(s);
+   const analysis=document.querySelector('[data-stage="Analysis"]');
+   const complete=grade.parts.interpretation>0;
+   analysis.classList.toggle('complete',complete);
+   analysis.querySelector('span').textContent=complete?'Complete':'In progress';
+   document.getElementById('phy-score').textContent=grade.score+'%';
+   document.querySelector('[data-rubric="interpretation"]').textContent=grade.parts.interpretation+' points earned';
+ };
  document.getElementById('phy-reset').onclick=()=>{if(confirm('Reset the circuit and measurements?')){s.physics=initialPhysics();s.ppe=false;s.prepared=false;s.notes='';s.outcome=null;s.readings=[];refresh()}};
  document.getElementById('phy-submit').onclick=submit;
  document.getElementById('phy-export').onclick=()=>download('cnte-vsl-physics-session.json',JSON.stringify(s,null,2),'application/json');
