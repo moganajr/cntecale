@@ -1,0 +1,27 @@
+import {analyzeCircuit} from './physicsCircuit.js';
+export const ITEMS=['supply','r1','r2','ammeter','voltmeter','switch'];
+export const TERMINALS=ITEMS.flatMap(id=>[id+':a',id+':b']);
+const pair=(a,b)=>[a,b].sort().join('|');
+// Wires connect named ideal terminals. Compare electrical nodes, not drawing order.
+const networks={series:[['supply:a','switch:a'],['switch:b','ammeter:a'],['ammeter:b','r1:a','voltmeter:a'],['r1:b','r2:a'],['r2:b','supply:b','voltmeter:b']],parallel:[['supply:a','switch:a'],['switch:b','ammeter:a'],['ammeter:b','r1:a','r2:a','voltmeter:a'],['r1:b','r2:b','supply:b','voltmeter:b']]};
+export function newPhysicsRoom(){return {ppe:false,held:null,items:Object.fromEntries(ITEMS.map(x=>[x,'store'])),topology:'series',volts:6,powered:false,selected:null,wires:[],records:[],events:[],notes:''};}
+function nodeSet(wires){const sets=TERMINALS.map(t=>new Set([t]));for(const w of wires){const [a,b]=w.split('|'),x=sets.find(g=>g.has(a)),y=sets.find(g=>g.has(b));if(x&&y&&x!==y){for(const t of y)x.add(t);sets.splice(sets.indexOf(y),1)}}return sets.map(g=>[...g].sort().join('|')).sort().join(';')}
+export function wiringMatches(s){const desired=networks[s.topology].flatMap(g=>g.slice(1).map(t=>pair(g[0],t)));return nodeSet(s.wires)===nodeSet(desired)}
+export function roomCircuit(s){if(!wiringMatches(s))return {status:'unwired',reason:'Circuit connections are incomplete or incorrect.',canMeasure:false,current:null,voltage:null};return analyzeCircuit({volts:s.volts,r1:100,r2:200,topology:s.topology,isolated:!s.powered,switchClosed:s.powered})}
+export function physicsRoomAction(s,id){const result=apply(s,id);s.events.push({action:id,result,at:new Date().toISOString()});return result;}
+function apply(s,id){
+ if(id==='safety'){s.ppe=true;return 'Virtual safety check confirmed.';}if(!s.ppe)return 'Visit the safety station first.';
+ if(ITEMS.includes(id)){if(s.powered)return 'Isolate the virtual source before moving equipment.';if(s.held)return 'Place the held item first.';if(s.wires.some(w=>w.includes(id+':')))return 'Disconnect leads before moving equipment.';s.held=id;s.items[id]='held';return 'Collected '+id+'.';}
+ if(id==='bench'&&s.held){s.items[s.held]='bench';s.held=null;return 'Equipment placed in its socket.';}
+ if(id==='store'&&s.held){s.items[s.held]='store';s.held=null;return 'Equipment returned to storage.';}
+ if(id.startsWith('terminal:')){if(s.powered)return 'Isolate power before altering leads.';const t=id.slice(9);if(!TERMINALS.includes(t)||s.items[t.split(':')[0]]!=='bench')return 'Place the instrument on the bench first.';if(!s.selected){s.selected=t;return 'Terminal selected. Choose another terminal.';}if(s.selected===t){s.selected=null;return 'Selection cancelled.';}const p=pair(s.selected,t);s.selected=null;if(s.wires.includes(p)){s.wires=s.wires.filter(w=>w!==p);return 'Lead removed.';}if(s.wires.length>=20)return 'Remove unused leads first.';s.wires.push(p);return 'Lead connected.';}
+ if(id==='clear'){if(s.powered)return 'Isolate power before removing leads.';s.wires=[];s.selected=null;return 'Leads removed.';}
+ if(id==='topology'){if(s.powered)return 'Isolate power before changing circuit layout.';s.topology=s.topology==='series'?'parallel':'series';s.wires=[];s.selected=null;return 'Selected '+s.topology+' circuit.';}
+ if(id==='voltage'){if(s.powered)return 'Isolate power before adjusting the virtual source.';s.volts=s.volts===6?9:s.volts===9?12:6;return 'Virtual voltage set to '+s.volts+' V.';}
+ if(id==='power'){if(s.powered){s.powered=false;return 'Virtual source isolated.';}if(!ITEMS.every(x=>s.items[x]==='bench')||!wiringMatches(s))return 'Safety interlock: inspect all connections before energizing.';s.powered=true;return 'Virtual circuit energized.';}
+ if(id==='notebook'){const r=roomCircuit(s);if(!r.canMeasure)return 'A valid energized circuit is required to record an observation.';s.records.push({status:r.status,topology:s.topology,voltage:r.voltage,current:r.current,resistance:r.resistance,watts:r.watts});return 'Measurement recorded.';}
+ return 'Select a relevant station or instrument.';
+}
+export function physicsRoomProgress(s){return [s.ppe,ITEMS.every(x=>s.items[x]==='bench'),wiringMatches(s)||s.records.length>0,s.records.some(r=>r.topology==='series'),s.records.some(r=>r.topology==='parallel'),!s.powered&&new Set(s.records.map(r=>r.topology)).size===2]}
+export function physicsRoomReport(s){const p=physicsRoomProgress(s),score=p.filter(Boolean).length*15+(s.notes.trim().length>=30?10:0);return {score,passed:p.every(Boolean)&&score>=90,rubric:{safety:p[0]?15:0,preparation:p[1]?15:0,connections:p[2]?15:0,series:p[3]?15:0,parallel:p[4]?15:0,isolation:p[5]?15:0,interpretation:s.notes.trim().length>=30?10:0}};}
+export function physicsRoomGuide(s){if(!s.ppe)return 'Confirm the virtual safety check.';if(s.held)return 'Place the held equipment on the workbench.';if(!ITEMS.every(x=>s.items[x]==='bench'))return 'Collect all six instruments from storage and place each on the bench.';if(s.powered)return 'Read the meters and record a measurement, then isolate the source.';if(!wiringMatches(s))return 'Select two terminals to attach a lead. Construct the assigned '+s.topology+' circuit while isolated.';if(new Set(s.records.map(r=>r.topology)).size===2)return 'Both circuit configurations recorded. Add your interpretation and save.';if(s.records.some(r=>r.topology===s.topology))return 'Change to the other topology and reconnect while isolated.';return 'Connections verified. Energize the virtual circuit and observe the meters.';}
