@@ -6,7 +6,7 @@ import {freshBench,applyBenchAction,practiceStatus} from './liveEngine.js';
 import {EQUIPMENT} from './equipmentEngine.js';
 import {freshServiceBench,serviceAction,serviceAssessment} from './serviceMechanics.js';
 import {MEDICAL_SCENARIOS,freshMedicalProcedure,medicalAction,medicalPracticalAssessment} from './medicalProcedure.js';
-import {SPATIAL_LABS,freshSpatial,applySpatialAction,spatialAssessment} from './spatialClassroomCore.js';
+import {SPATIAL_LABS,freshSpatial,applySpatialAction,spatialAssessment,stopSpatialFlow} from './spatialClassroomCore.js';
 
 export function makeClassroomState({mode='titration',equipmentId='electrical-panel',teacherName='Lecturer',spatialLab='physics'}={}){
  if(!['titration','equipment','spatial'].includes(mode))throw Error('Unsupported classroom mode');
@@ -48,7 +48,7 @@ export function applyClassroomCommand(room,actor,command){
  else if(command.type==='medical_demo_action'&&room.mode==='equipment'&&room.medicalDemo)room.medicalDemo=medicalAction(room.medicalDemo,command.action);
  else if(command.type==='pause'){
   const learner=room.learners.get(command.studentId);if(!learner)throw Error('Unknown learner');
-  learner.locked=command.value===true;learner.bench.locked=learner.locked;learner.service.locked=learner.locked;
+  learner.locked=command.value===true;learner.bench.locked=learner.locked;learner.service.locked=learner.locked;if(learner.locked)stopSpatialFlow(learner.spatial);
  }else if(command.type==='reset_learner'){
   const learner=room.learners.get(command.studentId);if(!learner)throw Error('Unknown learner');
   const name=learner.name;

@@ -10,6 +10,7 @@ import {EQUIPMENT} from '../src/equipmentEngine.js';
 import {freshServiceBench,serviceAction,serviceAssessment} from '../src/serviceMechanics.js';
 import {MEDICAL_SCENARIOS,medicalPracticalAssessment} from '../src/medicalProcedure.js';
 import {makeClassroomState,enrollLearner,applyClassroomCommand,classroomSnapshot} from '../src/classroomCore.js';
+import {advanceSpatialFlow,stopSpatialFlow} from '../src/spatialClassroomCore.js';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
 const port=Number(process.env.PORT||8080),host=process.env.HOST||'127.0.0.1';
 const previewKey=process.env.LIVE_PREVIEW_KEY||'';
@@ -54,7 +55,8 @@ wss.on('connection',(ws,req)=>{const query=new URL(req.url,'http://localhost').s
 
  announce(room);
  }catch(e){if(e.safetyStop){const target=role==='student'?person.bench:room.demo;target.safetyStops++;target.updatedAt=Date.now();target.events.push({kind:'safety-stop',at:target.updatedAt});announce(room)}tell(ws,{type:'error',message:String(e.message||'Invalid action').slice(0,180)})}});
- ws.on('close',()=>{room.clients.delete(client);if(person.sockets)person.sockets.delete(ws);announce(room)});
+ ws.on('close',()=>{room.clients.delete(client);if(person.sockets)person.sockets.delete(ws);if(room.mode==='spatial'){const state=role==='lecturer'?room.spatialDemo:person.spatial;if(![...room.clients].some(c=>c.role===role&&c.id===id)&&stopSpatialFlow(state))room.revision++;}announce(room)});
 });
+const flowTimer=setInterval(()=>{for(const room of rooms.values()){if(room.mode!=='spatial')continue;let changed=advanceSpatialFlow(room.spatialLab,room.spatialDemo);for(const u of room.learners.values())if(!u.locked)changed=advanceSpatialFlow(room.spatialLab,u.spatial)||changed;if(changed){room.revision++;announce(room)}}},250);flowTimer.unref();
 const cleaner=setInterval(()=>{for(const [id,room] of rooms)if(Date.now()-room.created>roomTtl){for(const x of room.clients)x.ws.close(1001,'Classroom expired');rooms.delete(id)}},60000);cleaner.unref();
 server.listen(port,host,()=>console.log('CNTE VSL live prototype running on http://'+host+':'+port));
