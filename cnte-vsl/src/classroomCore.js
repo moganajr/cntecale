@@ -6,11 +6,13 @@ import {freshBench,applyBenchAction,practiceStatus} from './liveEngine.js';
 import {EQUIPMENT} from './equipmentEngine.js';
 import {freshServiceBench,serviceAction,serviceAssessment} from './serviceMechanics.js';
 import {MEDICAL_SCENARIOS,freshMedicalProcedure,medicalAction,medicalPracticalAssessment} from './medicalProcedure.js';
+import {SPATIAL_LABS,freshSpatial,applySpatialAction,spatialAssessment} from './spatialClassroomCore.js';
 
-export function makeClassroomState({mode='titration',equipmentId='electrical-panel',teacherName='Lecturer'}={}){
- if(!['titration','equipment'].includes(mode))throw Error('Unsupported classroom mode');
+export function makeClassroomState({mode='titration',equipmentId='electrical-panel',teacherName='Lecturer',spatialLab='physics'}={}){
+ if(!['titration','equipment','spatial'].includes(mode))throw Error('Unsupported classroom mode');
+ if(mode==='spatial'&&!SPATIAL_LABS.includes(spatialLab))throw Error('Unknown spatial laboratory');
  if(!EQUIPMENT[equipmentId])throw Error('Unknown equipment model');
- return {mode,equipmentId,teacherName,assignment:mode==='equipment'?'Inspect, service and test the selected training equipment.':'Perform two concordant synthetic titration trials.',
+ return {mode,equipmentId,teacherName,spatialLab:mode==='spatial'?spatialLab:null,spatialDemo:mode==='spatial'?freshSpatial(spatialLab):null,assignment:mode==='spatial'?'Watch the lecturer demonstration, then complete your independent spatial practical.':mode==='equipment'?'Inspect, service and test the selected training equipment.':'Perform two concordant synthetic titration trials.',
  demo:freshBench('Lecturer demonstration'),serviceDemo:freshServiceBench(equipmentId,'Lecturer demonstration'),
  medicalDemo:MEDICAL_SCENARIOS[equipmentId]?freshMedicalProcedure(equipmentId):null,
  learners:new Map(),revision:0,events:[]};
@@ -18,7 +20,7 @@ export function makeClassroomState({mode='titration',equipmentId='electrical-pan
 export function enrollLearner(room,id,name){
  if(!id||typeof name!=='string'||name.trim().length<2)throw Error('Valid learner required');
  if(room.learners.has(id))throw Error('Duplicate learner');
- room.learners.set(id,{name,bench:freshBench(name),service:freshServiceBench(room.equipmentId,name),medical:MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null,locked:false});
+ room.learners.set(id,{name,bench:freshBench(name),service:freshServiceBench(room.equipmentId,name),medical:MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null,spatial:room.mode==='spatial'?freshSpatial(room.spatialLab):null,locked:false});
  return room.learners.get(id);
 }
 function log(room,kind,actor,detail){
@@ -33,6 +35,7 @@ export function applyClassroomCommand(room,actor,command){
  if(actor.role==='student'){
   if(student.locked)throw Error('Lecturer paused this practical');
   if(command.type==='action'&&room.mode==='titration')student.bench=applyBenchAction(student.bench,command.action);
+  else if(command.type==='spatial_action'&&room.mode==='spatial'){const detail=applySpatialAction(room.spatialLab,student.spatial,command.action);log(room,command.type,actor.id,detail);return {updated:true};}
   else if(command.type==='equipment_action'&&room.mode==='equipment')student.service=serviceAction(student.service,command.action);
   else if(command.type==='medical_action'&&room.mode==='equipment'&&student.medical)student.medical=medicalAction(student.medical,command.action);
   else throw Error('Student action is not permitted for this classroom');
@@ -40,6 +43,7 @@ export function applyClassroomCommand(room,actor,command){
   return {updated:true};
  }
  if(command.type==='demo_action'&&room.mode==='titration')room.demo=applyBenchAction(room.demo,command.action);
+ else if(command.type==='spatial_demo_action'&&room.mode==='spatial'){const detail=applySpatialAction(room.spatialLab,room.spatialDemo,command.action);log(room,command.type,'lecturer',detail);return {updated:true};}
  else if(command.type==='equipment_demo_action'&&room.mode==='equipment')room.serviceDemo=serviceAction(room.serviceDemo,command.action);
  else if(command.type==='medical_demo_action'&&room.mode==='equipment'&&room.medicalDemo)room.medicalDemo=medicalAction(room.medicalDemo,command.action);
  else if(command.type==='pause'){
@@ -48,10 +52,10 @@ export function applyClassroomCommand(room,actor,command){
  }else if(command.type==='reset_learner'){
   const learner=room.learners.get(command.studentId);if(!learner)throw Error('Unknown learner');
   const name=learner.name;
-  Object.assign(learner,{bench:freshBench(name),service:freshServiceBench(room.equipmentId,name),medical:MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null,locked:false});
+  Object.assign(learner,{bench:freshBench(name),service:freshServiceBench(room.equipmentId,name),medical:MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null,spatial:room.mode==='spatial'?freshSpatial(room.spatialLab):null,locked:false});
  }else if(command.type==='reset_demo'){
   room.demo=freshBench('Lecturer demonstration');room.serviceDemo=freshServiceBench(room.equipmentId,'Lecturer demonstration');
-  room.medicalDemo=MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null;
+  room.medicalDemo=MEDICAL_SCENARIOS[room.equipmentId]?freshMedicalProcedure(room.equipmentId):null;room.spatialDemo=room.mode==='spatial'?freshSpatial(room.spatialLab):null;
  }else if(command.type==='assignment'){
   if(typeof command.text!=='string'||command.text.trim().length<5||command.text.length>500)throw Error('Assignment must be 5–500 characters');
   room.assignment=command.text.trim();
@@ -67,7 +71,7 @@ export function classroomSnapshot(room,{role='lecturer',id=null}={}){
  const selected=role==='lecturer'?[...room.learners.entries()]:room.learners.has(id)?[[id,room.learners.get(id)]]:[];
  return {
   type:'snapshot',mode:room.mode,equipmentId:room.equipmentId,assignment:room.assignment,revision:room.revision,
-  demo:room.demo,serviceDemo:room.serviceDemo,medicalDemo:room.medicalDemo,
+  demo:room.demo,serviceDemo:room.serviceDemo,medicalDemo:room.medicalDemo,spatialLab:room.spatialLab,spatialDemo:room.spatialDemo,spatialParticipants:room.mode==='spatial'?selected.map(([learnerId,u])=>({id:learnerId,name:u.name,state:u.spatial,locked:u.locked,assessment:spatialAssessment(room.spatialLab,u.spatial)})):[],
   participants:selected.map(([learnerId,u])=>({id:learnerId,name:u.name,bench:u.bench,practice:practiceStatus(u.bench)})),
   serviceParticipants:selected.map(([learnerId,u])=>({id:learnerId,name:u.name,service:u.service,assessment:serviceAssessment(u.service)})),
   medicalParticipants:selected.map(([learnerId,u])=>({id:learnerId,name:u.name,procedure:u.medical,assessment:u.medical?medicalPracticalAssessment(u.medical):null}))
