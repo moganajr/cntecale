@@ -1,0 +1,13 @@
+import assert from 'node:assert/strict';
+import {aggregateReport,saveReport,readArchive,summarize,normalizeArchive,restoreArchive} from '../src/reportArchive.js';
+const id='11111111-1111-4111-8111-111111111111',id2='22222222-2222-4222-8222-222222222222';
+const raw={lab:'physics',simulationOnly:true,exportedAt:'2026-11-28T00:00:00Z',room:'SECRET',assignment:'PRIVATE',learners:[{name:'PRIVATE',assessment:{score:100,passed:true},observations:[{notes:'PRIVATE'}]},{name:'PRIVATE',assessment:{score:40,passed:false},observations:[]}]};
+const report=aggregateReport(raw,id);
+assert.equal(report.totalScore,140);assert.equal(report.passed,1);assert.equal(report.observed,1);assert.equal(report.participants,2);
+assert.ok(!JSON.stringify(report).includes('PRIVATE'));assert.ok(!JSON.stringify(report).includes('SECRET'));
+const map=new Map(),storage={getItem:k=>map.get(k),setItem:(k,v)=>map.set(k,v)};
+saveReport(storage,report);saveReport(storage,report);assert.equal(readArchive(storage).length,1);
+saveReport(storage,aggregateReport({...raw,learners:[raw.learners[0]]},id2));assert.equal(summarize(readArchive(storage)).average,80);assert.equal(summarize([]).passRate,null);
+assert.throws(()=>aggregateReport({...raw,lab:'unknown'},id));assert.throws(()=>aggregateReport({...raw,learners:[{assessment:{score:101,passed:true}}]},id));assert.throws(()=>normalizeArchive([report,report]));
+const backup={format:'cnte-vsl-anonymous-archive-v1',simulationOnly:true,reports:[report]};restoreArchive(storage,backup);assert.equal(readArchive(storage).length,2);assert.throws(()=>restoreArchive(storage,{...backup,reports:[{...report,participants:-1}]}));
+console.log('Anonymous class archive tests passed');
