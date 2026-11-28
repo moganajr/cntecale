@@ -1,0 +1,6 @@
+import assert from 'node:assert/strict';
+import {newPlantRoom,plantRoomAction,plantRoomReport,plantRoomProgress,PLANT_SLIDES} from '../src/plantRoomState.js';
+const s=newPlantRoom(),act=id=>plantRoomAction(s,id);
+assert.match(act('scope'),/safety/);act('safety');act('scope');act('bench');act('onion');act('stage');assert.match(act('record'),/Illuminate/);assert.match(act('objective'),/Center and focus/);act('light');act('x:50');act('y:50');act('focus:44');act('objective');act('focus:52');assert.match(act('record'),/Review/);
+for(const f of ['cell wall','nucleus','cytoplasm','vacuole'])act('feature:'+f);assert.match(act('record'),/recorded/);assert.equal(s.records[0].magnification,100);act('unload');act('store');act('leaf');act('stage');act('x:50');act('y:50');act('focus:44');for(const f of ['guard cells','stoma','epidermal cells'])act('feature:'+f);assert.match(act('record'),/recorded/);assert.deepEqual(s.records.map(r=>r.specimenId),PLANT_SLIDES);s.notes='The leaf diagram contains stomata; the onion diagram shows cell walls and nuclei.';assert.ok(plantRoomProgress(s).every(Boolean));assert.equal(plantRoomReport(s).score,100);assert.equal(plantRoomReport(s).passed,true);
+console.log('Plant microscopy room: safe plant slides, focus gates, observations and assessment passed.');
