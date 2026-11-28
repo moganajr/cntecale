@@ -1,10 +1,11 @@
+import {GEAR_PARTS,GEAR_HOME,GEAR_STATIONS,newGearRoom,gearRoomAction,gearRoomReport} from './gearRoomState.js';
 import {ITEMS,TERMINALS,newPhysicsRoom,physicsRoomAction,physicsRoomReport} from './physicsRoomState.js';
 import {PLANT_SLIDES,PLANT_FEATURES,newPlantRoom,plantRoomAction,plantRoomReport} from './plantRoomState.js';
 import {newRoom,roomAction,roomAssessment,advanceLiquid} from './roomState.js';
 import {newTitrationRoom,titrationRoomAction,titrationReport,advanceTitration} from './titrationRoomState.js';
-export const SPATIAL_LABS=['physics','plant','water','chemistry'];
-export const freshSpatial=lab=>lab==='physics'?newPhysicsRoom():lab==='plant'?newPlantRoom():lab==='water'?newRoom():lab==='chemistry'?newTitrationRoom():null;
-export const spatialAssessment=(lab,s)=>lab==='physics'?physicsRoomReport(s):lab==='plant'?plantRoomReport(s):lab==='water'?roomAssessment(s):titrationReport(s);
+export const SPATIAL_LABS=['physics','plant','water','chemistry','engineering'];
+export const freshSpatial=lab=>lab==='physics'?newPhysicsRoom():lab==='plant'?newPlantRoom():lab==='water'?newRoom():lab==='chemistry'?newTitrationRoom():lab==='engineering'?newGearRoom():null;
+export const spatialAssessment=(lab,s)=>lab==='physics'?physicsRoomReport(s):lab==='plant'?plantRoomReport(s):lab==='water'?roomAssessment(s):lab==='engineering'?gearRoomReport(s):titrationReport(s);
 const waterActions=new Set(['beaker','cylinder','bench','water','sink','storage','pour','notebook']);
 const chemistryActions=new Set(['safety','flask','burette','sample','indicator','reference','bench','store','inspect','valve','notebook']);
 export function stopSpatialFlow(state){if(!state?.flow)return false;state.flow=null;state.flowAt=null;return true;}
@@ -25,6 +26,7 @@ function stationFor(lab,state,id){
 export function applySpatialAction(lab,state,action){
  if(!state||!action||typeof action.id!=='string'||action.id.length>80)throw Error('Invalid spatial action');
  if(action.id==='notes'){if(typeof action.text!=='string'||action.text.length>2000)throw Error('Notes must be at most 2000 characters');state.notes=action.text;return 'Interpretation updated.';}
+ if(lab==='engineering'){const id=action.id;if(!GEAR_PARTS.includes(id)&&!Object.hasOwn(GEAR_STATIONS,id))throw Error('Unsupported engineering action');const pose=GEAR_PARTS.includes(id)?(state.items[id]==='store'?GEAR_HOME[id]:[0,.55]):GEAR_STATIONS[id];const result=gearRoomAction(state,id);state.spatialPose=[...pose];return result;}
  if(state.flow){advanceSpatialFlow(lab,state);if(action.id==='stop'){stopSpatialFlow(state);return 'Virtual flow stopped.';}if(state.flow)throw Error('Stop virtual flow before changing apparatus.');}
  if(action.id==='stop'&&(lab==='water'||lab==='chemistry'))return 'Virtual flow stopped.';
  if(lab==='water'&&/^target:(30|50|70|100)$/.test(action.id)){if(state.events.length||state.records.length)throw Error('Set the target before starting a practical.');state.targetMl=Number(action.id.slice(7));return 'Assigned volume updated.';}

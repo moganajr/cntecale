@@ -1,4 +1,4 @@
-export const LABS=Object.freeze({physics:'Physics · DC circuits',water:'Foundations · water measurement',chemistry:'Chemistry · virtual titration',plant:'Biology · synthetic plant microscopy'});
+export const LABS=Object.freeze({physics:'Physics · DC circuits',water:'Foundations · water measurement',chemistry:'Chemistry · virtual titration',plant:'Biology · synthetic plant microscopy',engineering:'Engineering · hand-crank gear trainer'});
 export const KEY='cnte-vsl-aggregate-reports-v1';
 const validId=id=>typeof id==='string'&&/^[a-f0-9-]{36}$/i.test(id);
 const validLab=lab=>Object.hasOwn(LABS,lab);
